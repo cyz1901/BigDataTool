@@ -1,4 +1,4 @@
-package sample;
+package pers.cyz.bigdatatool.gui;
 
 import javafx.application.Application;
 
