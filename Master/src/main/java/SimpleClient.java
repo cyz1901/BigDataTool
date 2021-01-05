@@ -3,6 +3,7 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
+import pers.cyz.BigDataTool.Master.ThirftService.HelloWorldService;
 
 public class SimpleClient {
     public static void main(String[] args) {
