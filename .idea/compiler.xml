@@ -18,11 +18,13 @@
         <outputRelativeToContentRoot value="true" />
         <module name="Master" />
         <module name="Flower" />
+        <module name="Hadoop" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="15">
-      <module name="BigDataTool-Service" target="15" />
-      <module name="Flower" target="15" />
+      <module name="BigDataTool-Service" target="1.8" />
+      <module name="Flower" target="14" />
+      <module name="Hadoop" target="1.8" />
       <module name="Master" target="15" />
     </bytecodeTargetLevel>
   </component>

@@ -5,6 +5,7 @@
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/Gui/pom.xml" />
+        <option value="$PROJECT_DIR$/Hadoop/pom.xml" />
       </list>
     </option>
   </component>
