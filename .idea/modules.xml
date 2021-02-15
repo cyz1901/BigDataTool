@@ -7,6 +7,7 @@
       <module fileurl="file://$PROJECT_DIR$/Hadoop/Hadoop.iml" filepath="$PROJECT_DIR$/Hadoop/Hadoop.iml" />
       <module fileurl="file://$PROJECT_DIR$/Kafka/Kafka.iml" filepath="$PROJECT_DIR$/Kafka/Kafka.iml" />
       <module fileurl="file://$PROJECT_DIR$/Master/Master.iml" filepath="$PROJECT_DIR$/Master/Master.iml" />
+      <module fileurl="file://$PROJECT_DIR$/UIService/UIService.iml" filepath="$PROJECT_DIR$/UIService/UIService.iml" />
     </modules>
   </component>
 </project>

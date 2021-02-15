@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
+    <option name="USE_RELEASE_OPTION" value="false" />
     <wildcardResourcePatterns>
       <entry name="!?*.java" />
       <entry name="!?*.form" />
@@ -18,14 +19,16 @@
         <outputRelativeToContentRoot value="true" />
         <module name="Master" />
         <module name="Flower" />
+        <module name="UIService" />
         <module name="Hadoop" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="15">
-      <module name="BigDataTool-Service" target="1.8" />
-      <module name="Flower" target="14" />
+      <module name="BigDataTool-Service" target="15" />
+      <module name="Flower" target="15" />
       <module name="Hadoop" target="1.8" />
       <module name="Master" target="15" />
+      <module name="UIService" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -6,6 +6,9 @@
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/Gui/pom.xml" />
         <option value="$PROJECT_DIR$/Hadoop/pom.xml" />
+        <option value="$USER_HOME$/Downloads/UIService/pom.xml" />
+        <option value="$PROJECT_DIR$/Master/pom.xml" />
+        <option value="$PROJECT_DIR$/UIService/pom.xml" />
       </list>
     </option>
   </component>
