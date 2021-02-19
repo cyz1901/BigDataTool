@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>pers.cyz</groupId>
-    <artifactId>BigDataTool-Service</artifactId>
+    <artifactId>bigdatatool-service</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <properties>
@@ -23,10 +23,10 @@
 
     </properties>
     <modules>
-        <module>Master</module>
-        <module>Flower</module>
-        <module>Hadoop</module>
-        <module>UIService</module>
+        <module>master</module>
+        <module>flower</module>
+        <module>hadoop</module>
+        <module>uiservice</module>
     </modules>
     <dependencyManagement>
         <dependencies>
@@ -76,11 +76,27 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-common</artifactId>
             <version>3.3.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
             <version>3.3.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>

@@ -1,17 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <configuration>
-    <!--指定namenode的地址-->
-    <property>
-        <name>fs.defaultFS</name>
-        <value>hdfs://DEV2:8020</value>
-    </property>
-    <!--用来指定使用hadoop时产生文件的存放目录-->
-    <property>
-        <name>hadoop.tmp.dir</name>
-        <value>file:/data/hadoop/hadoop-2.6.0/tmp</value>
-    </property>
-    <!--用来设置检查点备份日志的最长时间-->
-    <property>
-        <name>fs.checkpoint.period</name>
-        <value>3600</value>
-    </property>
+
+
+        
+        <property attr="hello"></property>
+
+        <property attr="hello"></property>
 </configuration>
