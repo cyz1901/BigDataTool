@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>pers.cyz</groupId>
-        <artifactId>BigDataTool-Service</artifactId>
+        <artifactId>bigdatatool-service</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <groupId>pers.cyz.BigDataTool-Service</groupId>
@@ -29,6 +29,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
 			<version>${spring.boot.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>logback-classic</artifactId>
+                    <groupId>ch.qos.logback</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
