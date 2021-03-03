@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package grpc;
+option java_package = "pers.cyz.bigdatatool.node.grpc.com";
+option java_multiple_files = true;
+
+service Connect{
+  rpc register(RegisterRequest) returns (stream RegisterResponse);
+  rpc downloadComponent(stream DownloadComponentRequest) returns (stream DownloadComponentResponse);
+  rpc editFile(editFileRequest) returns (editFileResponse);
+}
+
+// register
+message RegisterRequest {
+  int32 c = 1;
+}
+
+message RegisterResponse {
+  FlowerStatus status = 1;
+}
+
+message FlowerStatus {
+  string ip = 1;
+  string status = 2;
+}
+
+// downloadComponent
+message DownloadComponentRequest {
+  map<string, string> componentMap = 1;
+}
+
+message DownloadComponentResponse {
+  int64 totalSize = 1;
+  int64 alreadyDownloadSize = 2;
+}
+
+// editFile
+message editFileRequest {
+  string filePath = 1;
+  string operationType = 2;
+  string text = 3;
+}
+
+message editFileResponse {
+  string message = 1;
+}

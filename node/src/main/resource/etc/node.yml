@@ -1,2 +1,4 @@
 master:
   host: Computer
+repository:
+  url: https://mirrors.tuna.tsinghua.edu.cn

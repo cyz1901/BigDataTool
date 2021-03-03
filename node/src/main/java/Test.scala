@@ -1,8 +1,10 @@
+import java.net.InetAddress
+import javax.servlet.http.HttpServletRequest
 import scala.collection.immutable.HashSet
 import scala.util.control.Breaks.break
 import sys.process._
 class Test {
-
+  var oo : Option[String] = _
 
   def checkIsNameNode(): Unit ={
     val list: Array[String] = "jps".!!.split("\n")
@@ -18,6 +20,8 @@ class Test {
 }
 object Test {
   def main(args: Array[String]): Unit = {
-    println("hdhsaki")
+
+    var ll : Test = new  Test()
+    println(ll.oo)
   }
 }
