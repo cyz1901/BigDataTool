@@ -6,6 +6,7 @@ option java_multiple_files = true;
 
 service Connect{
   rpc register(RegisterRequest) returns (stream RegisterResponse);
+  rpc hostMap(hostMapRequest) returns (hostMapResponse);
   rpc downloadComponent(stream DownloadComponentRequest) returns (stream DownloadComponentResponse);
   rpc editFile(editFileRequest) returns (editFileResponse);
 }
@@ -22,6 +23,16 @@ message RegisterResponse {
 message FlowerStatus {
   string ip = 1;
   string status = 2;
+}
+
+// hostMap
+message hostMapRequest {
+
+}
+
+message hostMapResponse{
+  string hostName = 1;
+  string ip = 2;
 }
 
 // downloadComponent

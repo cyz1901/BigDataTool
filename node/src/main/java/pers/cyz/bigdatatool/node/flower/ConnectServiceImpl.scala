@@ -1,7 +1,7 @@
 package pers.cyz.bigdatatool.node.flower
 
 import io.grpc.stub.StreamObserver
-import pers.cyz.bigdatatool.node.grpc.com.{ConnectGrpc, DownloadComponentRequest, DownloadComponentResponse, FlowerStatus, RegisterRequest, RegisterResponse, editFileRequest, editFileResponse}
+import pers.cyz.bigdatatool.node.grpc.com.{ConnectGrpc, DownloadComponentRequest, DownloadComponentResponse, FlowerStatus, RegisterRequest, RegisterResponse, editFileRequest, editFileResponse, hostMapRequest, hostMapResponse}
 
 import java.util.concurrent.{CountDownLatch, TimeUnit}
 import java.util.logging.Logger
@@ -37,5 +37,11 @@ class ConnectServiceImpl extends ConnectGrpc.ConnectImplBase {
    */
   override def editFile(request: editFileRequest, responseObserver: StreamObserver[editFileResponse]): Unit = {
     super.editFile(request, responseObserver)
+  }
+
+  /**
+   */
+  override def hostMap(request: hostMapRequest, responseObserver: StreamObserver[hostMapResponse]): Unit = {
+    super.hostMap(request, responseObserver)
   }
 }

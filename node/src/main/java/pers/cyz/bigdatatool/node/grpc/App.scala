@@ -26,7 +26,7 @@ object App {
     val loader = new Loader[AppConfig.type]().Builder
       .setLoaderType(Yaml)
       .setConfigFilePath("node/src/main/resource/etc/node.yml").build()
-    val res: AppConfig.type = loader.getObjMapping
+    val res: AppConfig.type = loader.fileToObjMapping()
     // 判断节点
     if (InetAddress.getLocalHost.getHostName == res.master.host) {
       node = new MasterNode()

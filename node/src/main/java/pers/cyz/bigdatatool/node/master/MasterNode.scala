@@ -49,14 +49,13 @@ class MasterNode extends Node {
 
     def initMetaData(): Unit = {
       val file = new File("metaData/nodeMap.txt")
-      if (file.exists()) {
-
-      } else {
-        file.mkdirs()
+      if (!file.getParentFile.exists()) {
+        file.getParentFile.mkdirs()
       }
-
+      file.createNewFile()
     }
 
+    initMetaData()
     invokeRegister()
   }
 }
