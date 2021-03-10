@@ -1,12 +1,9 @@
 package pers.cyz.bigdatatool.node.common.utils.loader
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.dom4j.{Document, Element}
-import org.dom4j.io.SAXReader
 import org.yaml.snakeyaml.constructor.Constructor
 import pers.cyz.bigdatatool.node.common.utils.loader
 import pers.cyz.bigdatatool.node.common.utils.loader.LoaderType.{Json, LoaderType, Xml, Yaml}
-import pers.cyz.bigdatatool.node.config.AppConfig
 import pers.cyz.bigdatatool.node.pojo.HostIpMeta
 
 import java.io.{File, FileInputStream}
