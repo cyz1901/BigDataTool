@@ -1,4 +1,5 @@
 master:
   host: Computer
+  metaData: metadata/
 repository:
   url: https://mirrors.tuna.tsinghua.edu.cn

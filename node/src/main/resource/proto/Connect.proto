@@ -38,6 +38,7 @@ message hostMapResponse{
 // downloadComponent
 message DownloadComponentRequest {
   map<string, string> componentMap = 1;
+  string commandType = 2;
 }
 
 message DownloadComponentResponse {
