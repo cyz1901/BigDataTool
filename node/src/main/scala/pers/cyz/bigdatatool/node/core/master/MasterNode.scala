@@ -1,18 +1,19 @@
-package pers.cyz.bigdatatool.node.core.distributed
+package pers.cyz.bigdatatool.node.core.master
 
-import io.grpc.stub.StreamObserver
-import io.grpc.{ManagedChannel, ManagedChannelBuilder}
 import pers.cyz.bigdatatool.node.common.config.AppConfig
-import pers.cyz.bigdatatool.node.common.pojo.ServiceLayer
-import pers.cyz.bigdatatool.node.grpc.com.{ConnectGrpc, DownloadComponentRequest, DownloadComponentResponse, RegisterRequest, RegisterResponse, hostMapRequest}
+import pers.cyz.bigdatatool.node.core.distributed.Node
 import pers.cyz.bigdatatool.node.uiservice.UiServiceApplication
 
 import java.io.File
-import java.util
-import java.util.logging.Logger
 
 object MasterNode extends Node {
-  private val logger = Logger.getLogger(classOf[MasterNode.type].getName)
+  var masterServiceArray: Array[MasterService] = _
+
+  {
+    AppConfig
+    .
+  }
+  /* private val logger = Logger.getLogger(classOf[MasterNode.type].getName)
   val channel: ManagedChannel = ManagedChannelBuilder.forAddress("localhost", 50055).usePlaintext().build()
   //  OrderManagementGrpc.OrderManagementBlockingStub stub = OrderManagementGrpc.newBlockingStub(channel);
   val stub: ConnectGrpc.ConnectBlockingStub = ConnectGrpc.newBlockingStub(channel)
@@ -87,12 +88,12 @@ object MasterNode extends Node {
     while (lock) {
 
     }
-  }
+  }*/
 
   override def run(): Unit = {
 
     def initMetaData(): Unit = {
-      val file = new File(AppConfig.master.metaData + "data.json")
+      val file = new File(AppConfig.repository.downloadFile + "data.json")
       if (!file.getParentFile.exists()) {
         file.getParentFile.mkdirs()
       }
@@ -101,14 +102,14 @@ object MasterNode extends Node {
 
     initMetaData()
     println("start")
-    val ui = new Thread(){
+    val ui = new Thread() {
       UiServiceApplication.run()
 
 
     }
 
-//        invokeRegister()
-//    invokeDownloadComponent()
+    //        invokeRegister()
+    //    invokeDownloadComponent()
 
   }
 }

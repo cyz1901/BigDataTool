@@ -5,36 +5,29 @@ option java_package = "pers.cyz.bigdatatool.node.grpc.com";
 option java_multiple_files = true;
 
 service Connect{
-  rpc register(RegisterRequest) returns (stream RegisterResponse);
-  rpc hostMap(hostMapRequest) returns (hostMapResponse);
+  rpc register(stream RegisterRequest) returns (RegisterResponse);
+//  rpc downloadComponent(stream DownloadComponentRequest) returns (stream DownloadComponentResponse);
+//  rpc editFile(editFileRequest) returns (editFileResponse);
+}
+
+service Serve{
   rpc downloadComponent(stream DownloadComponentRequest) returns (stream DownloadComponentResponse);
   rpc editFile(editFileRequest) returns (editFileResponse);
 }
 
+// Connect
 // register
 message RegisterRequest {
-  int32 c = 1;
+  string ip = 1;
+  string name = 2;
+  string status = 3;
 }
 
 message RegisterResponse {
-  FlowerStatus status = 1;
+  string msg = 1;
 }
 
-message FlowerStatus {
-  string ip = 1;
-  string status = 2;
-}
-
-// hostMap
-message hostMapRequest {
-
-}
-
-message hostMapResponse{
-  string hostName = 1;
-  string ip = 2;
-}
-
+// Serve
 // downloadComponent
 message DownloadComponentRequest {
   map<string, string> componentMap = 1;

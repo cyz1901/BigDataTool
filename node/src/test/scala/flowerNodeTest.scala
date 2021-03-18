@@ -2,7 +2,7 @@
 import pers.cyz.bigdatatool.node.common.config.{AppConfig, SystemConfig}
 import pers.cyz.bigdatatool.node.common.utils.loader.Loader
 import pers.cyz.bigdatatool.node.common.utils.loader.LoaderType.Yaml
-import pers.cyz.bigdatatool.node.core.distributed.FlowerNode
+import pers.cyz.bigdatatool.node.core.flower.FlowerNode
 
 object flowerNodeTest {
   def main(args: Array[String]): Unit = {

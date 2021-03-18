@@ -1,7 +1,7 @@
-package pers.cyz.bigdatatool.node.core.distributed
+package pers.cyz.bigdatatool.node.core.flower
 
 import io.grpc.{Server, ServerBuilder}
-import pers.cyz.bigdatatool.node.core.flower.ConnectServiceImpl
+import pers.cyz.bigdatatool.node.core.distributed.Node
 
 import java.util.logging.Logger
 
@@ -21,7 +21,7 @@ class FlowerNode extends Node {
     }
     // grpc服务连接
     val port = 50055
-    server = ServerBuilder.forPort(port).addService(new ConnectServiceImpl()).build().start()
+    server = ServerBuilder.forPort(port).addService(new ServeServiceImpl()).build().start()
     logger.info("Server started, listening on " + port)
     Runtime.getRuntime.addShutdownHook(new Thread(() => {
       // Use stderr here since the logger may have been reset by its JVM shutdown hook.

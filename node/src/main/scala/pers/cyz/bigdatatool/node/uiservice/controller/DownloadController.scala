@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.grpc.stub.StreamObserver
 import org.springframework.stereotype.Component
-import pers.cyz.bigdatatool.node.core.distributed.MasterNode.asyncStub
+import pers.cyz.bigdatatool.node.core.master.MasterNode.asyncStub
 import pers.cyz.bigdatatool.node.grpc.com.{DownloadComponentRequest, DownloadComponentResponse}
 import pers.cyz.bigdatatool.node.uiservice.pojo.{ComponentDownloadData, DownloadMsgData}
 

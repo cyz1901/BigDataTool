@@ -1,16 +1,14 @@
 package pers.cyz.bigdatatool.node.common.config
 
-import pers.cyz.bigdatatool.node.common.config.AppConfig.repositoryConfig
-
 import scala.collection.immutable.HashMap
 
 object AppConfig {
 
-  var master: nodeConfig.type = _
+  var serve: nodeConfig.type = _
   var repository: repositoryConfig.type = _
 
-  def setMaster(master: nodeConfig.type): Unit = {
-    this.master = master
+  def setServe(serve: nodeConfig.type): Unit = {
+    this.serve = serve
   }
 
   def setRepository(repository: repositoryConfig.type): Unit = {
@@ -19,29 +17,34 @@ object AppConfig {
 
 
   object nodeConfig {
-    var host: String = _
-    var metaData: String = _
+    var masterName: String = _
+    var nodeCount: Int = _
 
-    def setHost(host: String): Unit = {
-      this.host = host
+    def setMasterName(masterName: String): Unit = {
+      this.masterName = masterName
     }
 
-    def setMetaData(metaData: String): Unit ={
-      this.metaData = metaData
+    def setNodeCount(nodeCount: Int): Unit = {
+      this.nodeCount = nodeCount
     }
   }
 
   object repositoryConfig {
     var url: String = _
+    var downloadFile: String = _
 
     def setUrl(url: String): Unit = {
       this.url = url
     }
 
+    def setDownloadFile(downloadFile: String): Unit = {
+      this.downloadFile = downloadFile
+    }
+
     object componentUrl {
 
       val hadoopBaseUrl: String = "/apache/hadoop/common/"
-      val hadoopMap: HashMap[String,String] = HashMap("hadoop-3.3.0" -> "https://mirrors.tuna.tsinghua.edu.cn/apache/hadoop/common/hadoop-3.3.0/hadoop-3.3.0.tar.gz")
+      val hadoopMap: HashMap[String, String] = HashMap("hadoop-3.3.0" -> "https://mirrors.tuna.tsinghua.edu.cn/apache/hadoop/common/hadoop-3.3.0/hadoop-3.3.0.tar.gz")
 
     }
 

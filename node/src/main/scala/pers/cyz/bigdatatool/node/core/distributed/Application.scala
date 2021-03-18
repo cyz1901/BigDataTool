@@ -4,6 +4,8 @@ import io.grpc.Server
 import pers.cyz.bigdatatool.node.common.config.AppConfig
 import pers.cyz.bigdatatool.node.common.utils.loader.Loader
 import pers.cyz.bigdatatool.node.common.utils.loader.LoaderType.Yaml
+import pers.cyz.bigdatatool.node.core.flower.FlowerNode
+import pers.cyz.bigdatatool.node.core.master.MasterNode
 
 import java.net.InetAddress
 import java.util.logging.Logger
@@ -23,7 +25,7 @@ object Application {
 
 
     // 判断节点
-    if (InetAddress.getLocalHost.getHostName == res.master.host) {
+    if (InetAddress.getLocalHost.getHostName == res.serve.masterName) {
       node = MasterNode
     } else {
       node = new FlowerNode()
