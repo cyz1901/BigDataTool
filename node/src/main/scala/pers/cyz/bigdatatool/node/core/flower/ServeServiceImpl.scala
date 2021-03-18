@@ -3,7 +3,7 @@ package pers.cyz.bigdatatool.node.core.flower
 import io.grpc.stub.StreamObserver
 import pers.cyz.bigdatatool.node.common.utils.UrlUtils
 import pers.cyz.bigdatatool.node.core.download.DownloadExecutor
-import pers.cyz.bigdatatool.node.grpc.com.{DownloadComponentRequest, DownloadComponentResponse, RegisterRequest, RegisterResponse, ServeGrpc, editFileRequest, editFileResponse, hostMapRequest, hostMapResponse}
+import pers.cyz.bigdatatool.node.grpc.com.{DownloadComponentRequest, DownloadComponentResponse, ServeGrpc, editFileRequest, editFileResponse}
 
 import java.lang.Thread.sleep
 import java.net.URL

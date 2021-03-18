@@ -18,15 +18,14 @@ object Application {
 
   {
     // 获取配置
-    val loader = new Loader[AppConfig.type]().Builder
+    new Loader[AppConfig.type]().Builder
       .setLoaderType(Yaml)
-      .setConfigFilePath("node/src/main/resource/etc/node.yml").build()
-    val res: AppConfig.type = loader.fileToObjMapping()
+      .setConfigFilePath("node/src/main/resource/etc/node.yml").build().fileToObjMapping()
 
 
     // 判断节点
-    if (InetAddress.getLocalHost.getHostName == res.serve.masterName) {
-      node = MasterNode
+    if (InetAddress.getLocalHost.getHostName == AppConfig.serve.masterName) {
+      node = new MasterNode()
     } else {
       node = new FlowerNode()
     }

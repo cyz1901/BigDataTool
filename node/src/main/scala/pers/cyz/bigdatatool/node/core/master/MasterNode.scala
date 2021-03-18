@@ -1,17 +1,26 @@
 package pers.cyz.bigdatatool.node.core.master
 
+import io.grpc.{ManagedChannelBuilder, ServerBuilder}
 import pers.cyz.bigdatatool.node.common.config.AppConfig
+import pers.cyz.bigdatatool.node.common.pojo.RuntimeMeta
 import pers.cyz.bigdatatool.node.core.distributed.Node
+import pers.cyz.bigdatatool.node.grpc.com.ConnectGrpc
 import pers.cyz.bigdatatool.node.uiservice.UiServiceApplication
 
 import java.io.File
+import java.lang.Thread.sleep
+import scala.collection.mutable.ArrayBuffer
+import scala.util.control.Breaks.{break, breakable}
 
-object MasterNode extends Node {
-  var masterServiceArray: Array[MasterService] = _
+class MasterNode extends Node {
+  var masterClientArray: ArrayBuffer[MasterClient] = _
 
   {
-    AppConfig
-    .
+    //    for (i <- 0 until AppConfig.serve.nodeCount) {
+    //      masterClientArray.addOne(
+    //        new MasterClient()
+    //      )
+    //    }
   }
   /* private val logger = Logger.getLogger(classOf[MasterNode.type].getName)
   val channel: ManagedChannel = ManagedChannelBuilder.forAddress("localhost", 50055).usePlaintext().build()
@@ -91,25 +100,72 @@ object MasterNode extends Node {
   }*/
 
   override def run(): Unit = {
+    val service = new MasterService()
 
-    def initMetaData(): Unit = {
-      val file = new File(AppConfig.repository.downloadFile + "data.json")
-      if (!file.getParentFile.exists()) {
-        file.getParentFile.mkdirs()
+    // 启动grpc服务连接
+    val port = 50055
+    service.server = ServerBuilder.forPort(port).addService(new ConnectServiceImpl()).build().start()
+    service.logger.info("Master Server started, listening on " + port)
+
+    //阻塞等待节点都注册上
+
+
+    //启动uiService服务
+    val uiService = new Thread() {
+      override def run(): Unit = {
+        UiServiceApplication.run()
       }
-      file.createNewFile()
     }
+    uiService.setName("UiService")
+    uiService.start()
 
-    initMetaData()
-    println("start")
-    val ui = new Thread() {
-      UiServiceApplication.run()
+    //
 
-
+    //线程关闭钩子函数
+    Runtime.getRuntime.addShutdownHook(new Thread(() => {
+      // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+      service.logger.error("*** shutting down gRPC server since JVM is shutting down")
+      service.stop()
+      service.logger.error("*** server shut down")
     }
+    ))
+    service.blockUntilShutdown()
 
-    //        invokeRegister()
-    //    invokeDownloadComponent()
+    //    def initMetaData(): Unit = {
+    //      val file = new File(AppConfig.repository.downloadFile + "data.json")
+    //      if (!file.getParentFile.exists()) {
+    //        file.getParentFile.mkdirs()
+    //      }
+    //      file.createNewFile()
+    //    }
+    //
+    //    initMetaData()
 
+
+  }
+
+  override def init(): Unit = {
+
+
+  }
+
+  def initArray(): Unit = {
+    breakable {
+      while (true) {
+        if (RuntimeMeta.hostIpMap.size == AppConfig.serve.nodeCount) {
+          RuntimeMeta.hostIpMap.foreach(entry => {
+            val channel = ManagedChannelBuilder.forAddress(entry._1, 50055).usePlaintext().build()
+            this.masterClientArray.addOne(new MasterClient(
+              channel,
+              ConnectGrpc.newBlockingStub(channel),
+              ConnectGrpc.newStub(channel)
+            ))
+          })
+          break
+        } else {
+          sleep(10000)
+        }
+      }
+    }
   }
 }

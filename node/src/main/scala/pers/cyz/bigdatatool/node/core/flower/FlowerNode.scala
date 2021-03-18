@@ -7,7 +7,7 @@ import java.util.logging.Logger
 
 class FlowerNode extends Node {
   var node: Node = _
-  var server : Server = _
+  var server: Server = _
   private val logger = Logger.getLogger(classOf[FlowerNode].getName)
 
   override def run(): Unit = {
@@ -15,10 +15,12 @@ class FlowerNode extends Node {
     blockUntilShutdown()
   }
 
-  def start(): Unit ={
-    def initMetaData(): Unit ={
+  override def init(): Unit = {
+    ???
+  }
 
-    }
+  def start(): Unit = {
+
     // grpc服务连接
     val port = 50055
     server = ServerBuilder.forPort(port).addService(new ServeServiceImpl()).build().start()
@@ -27,7 +29,8 @@ class FlowerNode extends Node {
       // Use stderr here since the logger may have been reset by its JVM shutdown hook.
       logger.info("*** shutting down gRPC server since JVM is shutting down")
       stop()
-      logger.info("*** server shut down")}
+      logger.info("*** server shut down")
+    }
     ))
   }
 

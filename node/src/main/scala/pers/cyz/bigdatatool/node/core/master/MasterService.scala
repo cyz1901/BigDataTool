@@ -1,88 +1,50 @@
 package pers.cyz.bigdatatool.node.core.master
 
-import io.grpc.stub.StreamObserver
-import io.grpc.{ManagedChannel, ManagedChannelBuilder}
-import pers.cyz.bigdatatool.node.common.pojo.ServiceLayer
-import pers.cyz.bigdatatool.node.grpc.com._
+import io.grpc.{Server, ServerBuilder}
+import org.slf4j
+import org.slf4j.LoggerFactory
+import pers.cyz.bigdatatool.node.uiservice.UiServiceApplication
 
-import java.util
 import java.util.logging.Logger
 
 class MasterService {
-  private val logger = Logger.getLogger(classOf[MasterNode.type].getName)
-  val channel: ManagedChannel = ManagedChannelBuilder.forAddress("localhost", 50055).usePlaintext().build()
-  //  OrderManagementGrpc.OrderManagementBlockingStub stub = OrderManagementGrpc.newBlockingStub(channel);
-  val stub: ConnectGrpc.ConnectBlockingStub = ConnectGrpc.newBlockingStub(channel)
-  val asyncStub: ConnectGrpc.ConnectStub = ConnectGrpc.newStub(channel)
 
+  val logger: slf4j.Logger = LoggerFactory.getLogger(classOf[MasterService]) //Logger.getLogger(classOf[MasterService].getName)
+  var server: Server = _
 
-  def invokeRegister(): Unit = {
-    //    val finishLatch = new CountDownLatch(1)
-    @volatile var lock = true
+//  def start() {
+//    // grpc服务连接
+//    val port = 50055
+//    server = ServerBuilder.forPort(port).addService(new ConnectServiceImpl()).build().start()
+//    logger.info("Master Server started, listening on " + port)
+//
+//    //启动uiService服务
+//    val uiService = new Thread(){
+//      override def run(): Unit = {
+//        UiServiceApplication.run()
+//      }
+//    }
+//    uiService.setName("UiService")
+//    uiService.start()
+//
+//    //线程关闭钩子函数
+//    Runtime.getRuntime.addShutdownHook(new Thread(() => {
+//      // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+//      logger.error("*** shutting down gRPC server since JVM is shutting down")
+//      stop()
+//      logger.error("*** server shut down")
+//    }
+//    ))
+//    blockUntilShutdown()
+//  }
 
-    var bb: StreamObserver[RegisterResponse] = new StreamObserver[RegisterResponse] {
-      override def onNext(v: RegisterResponse): Unit = {
-        logger.info("Now the Flower: " + v.getStatus.getIp + " status is: " + v.getStatus.getStatus)
-        if (v.getStatus.getStatus == "error") {
-          lock = false
-        }
-      }
-
-      override def onError(throwable: Throwable): Unit = {
-        logger.info("Error")
-      }
-
-      override def onCompleted(): Unit = {
-        logger.info("Completed")
-      }
-    }
-
-    asyncStub.register(RegisterRequest.newBuilder().setC(10).build(), bb)
-    println("")
-
-    while (lock) {
-
-    }
-
-
+  def stop(): Unit = {
+    if (server != null) server.shutdown
   }
 
-  def invokeHostMap(): Unit = {
-    stub.hostMap(hostMapRequest.newBuilder().build())
-
+  @throws[InterruptedException]
+  def blockUntilShutdown(): Unit = {
+    if (server != null) server.awaitTermination()
   }
 
-  def invokeDownloadComponent(): Unit = {
-
-    @volatile var lock = true
-
-    var bb: StreamObserver[DownloadComponentResponse] = new StreamObserver[DownloadComponentResponse] {
-      override def onNext(v: DownloadComponentResponse): Unit = {
-        logger.info("Now totalSIze: " + v.getTotalSize + " nowSize is: " + v.getAlreadyDownloadSize)
-        ServiceLayer.DownloadService.totalSize = v.getTotalSize
-        ServiceLayer.DownloadService.alreadyDownloadSize = v.getAlreadyDownloadSize
-
-
-      }
-
-      override def onError(throwable: Throwable): Unit = {
-        logger.info("Error")
-      }
-
-      override def onCompleted(): Unit = {
-        logger.info("Completed")
-      }
-    }
-
-    val aa: StreamObserver[DownloadComponentRequest] = asyncStub.downloadComponent(bb)
-
-    // TODO 假数据验证
-    val map: java.util.Map[String, String] = new util.HashMap[String, String]()
-    map.put("hadoop", "3.3.0")
-    aa.onNext(DownloadComponentRequest.newBuilder().putAllComponentMap(map).setCommandType("start").build())
-
-    while (lock) {
-
-    }
-  }
 }

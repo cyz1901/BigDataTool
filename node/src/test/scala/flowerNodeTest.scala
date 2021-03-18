@@ -7,12 +7,12 @@ import pers.cyz.bigdatatool.node.core.flower.FlowerNode
 object flowerNodeTest {
   def main(args: Array[String]): Unit = {
     // 获取配置
-    val loader = new Loader[AppConfig.type]().Builder
+    new Loader[AppConfig.type]().Builder
       .setLoaderType(Yaml)
-      .setConfigFilePath("node/src/main/resource/etc/node.yml").build()
-    loader.fileToObjMapping()
-    val node = new FlowerNode()
-    node.run()
+      .setConfigFilePath("node/src/main/resource/etc/node.yml").build().fileToObjMapping()
+//    val node = new FlowerNode()
+//    node.run()
+    println(AppConfig.repository.url)
 //    println(UrlUtils.getUrl("hadoop","123456"))
 //    println(SystemConfig.compressedFormat)
 //    println(SystemConfig.localHostIp)

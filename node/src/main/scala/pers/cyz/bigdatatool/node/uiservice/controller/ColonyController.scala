@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import pers.cyz.bigdatatool.node.common.pojo.ComponentMap
-import pers.cyz.bigdatatool.node.core.master.MasterNode.{asyncStub, invokeDownloadComponent, logger}
-import pers.cyz.bigdatatool.node.grpc.com.{DownloadComponentRequest, DownloadComponentResponse}
 import pers.cyz.bigdatatool.node.uiservice.untils.Result
 import pers.cyz.bigdatatool.node.uiservice.pojo.ColonyObj
 import pers.cyz.bigdatatool.node.uiservice.pojo.ColonyObj.{ComponentMsgData, NodesMsgData}

@@ -3,7 +3,6 @@ package pers.cyz.bigdatatool.node.common.utils.loader
 import com.fasterxml.jackson.databind.ObjectMapper
 import LoaderType.{Json, LoaderType, Yaml}
 import org.yaml.snakeyaml.constructor.Constructor
-import pers.cyz.bigdatatool.node.common.pojo.HostIpMeta
 
 import java.io.{File, FileInputStream}
 import scala.reflect.{ClassTag, classTag}
@@ -129,21 +128,21 @@ class Loader[T: ClassTag] {
 
 }
 
-object LoaderFactoryTest {
-  def main(args: Array[String]): Unit = {
-    //    val loader = new Loader[AppConfig.type]().Builder
-    //      .setLoaderType(Yaml)
-    //      .setConfigFilePath("node/src/main/resource/etc/node.yml").build()
-    //    val res: AppConfig.type = loader.getObjMapping
-    //    println(res.repository.url)
-
-    val loader = new Loader[HostIpMeta]().Builder
-      .setLoaderType(Json)
-      .setConfigFilePath("node/src/main/resource/etc/hostIpMeta.json").build()
-    val res: HostIpMeta = loader.fileToObjMapping()
-    println(res.getHostName)
-
-
-  }
-}
+//object LoaderFactoryTest {
+//  def main(args: Array[String]): Unit = {
+//    //    val loader = new Loader[AppConfig.type]().Builder
+//    //      .setLoaderType(Yaml)
+//    //      .setConfigFilePath("node/src/main/resource/etc/node.yml").build()
+//    //    val res: AppConfig.type = loader.getObjMapping
+//    //    println(res.repository.url)
+//
+////    val loader = new Loader[HostIpMeta]().Builder
+////      .setLoaderType(Json)
+////      .setConfigFilePath("node/src/main/resource/etc/hostIpMeta.json").build()
+////    val res: HostIpMeta = loader.fileToObjMapping()
+////    println(res.getHostName)
+//
+//
+//  }
+//}
 
