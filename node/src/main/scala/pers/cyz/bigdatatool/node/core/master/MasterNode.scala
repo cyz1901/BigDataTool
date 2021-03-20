@@ -1,19 +1,21 @@
 package pers.cyz.bigdatatool.node.core.master
 
 import io.grpc.{ManagedChannelBuilder, ServerBuilder}
+import org.slf4j
+import org.slf4j.LoggerFactory
 import pers.cyz.bigdatatool.node.common.config.AppConfig
 import pers.cyz.bigdatatool.node.common.pojo.RuntimeMeta
 import pers.cyz.bigdatatool.node.core.distributed.Node
-import pers.cyz.bigdatatool.node.grpc.com.ConnectGrpc
+import pers.cyz.bigdatatool.node.grpc.com.{ServeGrpc}
 import pers.cyz.bigdatatool.node.uiservice.UiServiceApplication
 
-import java.io.File
 import java.lang.Thread.sleep
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks.{break, breakable}
 
-class MasterNode extends Node {
-  var masterClientArray: ArrayBuffer[MasterClient] = _
+object MasterNode extends Node {
+  var masterClientArray: ArrayBuffer[MasterClient] = new ArrayBuffer[MasterClient]()
+  val logger: slf4j.Logger = LoggerFactory.getLogger(classOf[MasterNode.type])
 
   {
     //    for (i <- 0 until AppConfig.serve.nodeCount) {
@@ -22,6 +24,7 @@ class MasterNode extends Node {
     //      )
     //    }
   }
+
   /* private val logger = Logger.getLogger(classOf[MasterNode.type].getName)
   val channel: ManagedChannel = ManagedChannelBuilder.forAddress("localhost", 50055).usePlaintext().build()
   //  OrderManagementGrpc.OrderManagementBlockingStub stub = OrderManagementGrpc.newBlockingStub(channel);
@@ -108,7 +111,7 @@ class MasterNode extends Node {
     service.logger.info("Master Server started, listening on " + port)
 
     //阻塞等待节点都注册上
-
+    initArray()
 
     //启动uiService服务
     val uiService = new Thread() {
@@ -118,8 +121,6 @@ class MasterNode extends Node {
     }
     uiService.setName("UiService")
     uiService.start()
-
-    //
 
     //线程关闭钩子函数
     Runtime.getRuntime.addShutdownHook(new Thread(() => {
@@ -154,15 +155,17 @@ class MasterNode extends Node {
       while (true) {
         if (RuntimeMeta.hostIpMap.size == AppConfig.serve.nodeCount) {
           RuntimeMeta.hostIpMap.foreach(entry => {
-            val channel = ManagedChannelBuilder.forAddress(entry._1, 50055).usePlaintext().build()
+            val channel = ManagedChannelBuilder.forAddress(entry._1, 50056).usePlaintext().build()
             this.masterClientArray.addOne(new MasterClient(
               channel,
-              ConnectGrpc.newBlockingStub(channel),
-              ConnectGrpc.newStub(channel)
+              ServeGrpc.newBlockingStub(channel),
+              ServeGrpc.newStub(channel)
             ))
           })
+          logger.info(s"注册已完成 元数据为${RuntimeMeta.hostIpMap}")
           break
         } else {
+          logger.info("等待注册完成")
           sleep(10000)
         }
       }

@@ -25,9 +25,9 @@ object Application {
 
     // 判断节点
     if (InetAddress.getLocalHost.getHostName == AppConfig.serve.masterName) {
-      node = new MasterNode()
+      node = MasterNode
     } else {
-      node = new FlowerNode()
+      node = FlowerNode
     }
   }
 

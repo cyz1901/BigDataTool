@@ -1,18 +1,25 @@
 package pers.cyz.bigdatatool.node.core.flower
 
 import io.grpc.{Server, ServerBuilder}
+import org.slf4j.{Logger, LoggerFactory}
 import pers.cyz.bigdatatool.node.core.distributed.Node
 
-import java.util.logging.Logger
 
-class FlowerNode extends Node {
+
+object FlowerNode extends Node {
   var node: Node = _
   var server: Server = _
-  private val logger = Logger.getLogger(classOf[FlowerNode].getName)
+  private val logger = LoggerFactory.getLogger(classOf[FlowerNode.type])
 
   override def run(): Unit = {
+    val tt = new Thread(){
+      override def run(): Unit = {
+        new FlowerClient().invokeRegister()
+      }
+    }
+    tt.setName("ConnectService")
+    tt.start()
     start()
-    blockUntilShutdown()
   }
 
   override def init(): Unit = {
@@ -22,7 +29,7 @@ class FlowerNode extends Node {
   def start(): Unit = {
 
     // grpc服务连接
-    val port = 50055
+    val port = 50056
     server = ServerBuilder.forPort(port).addService(new ServeServiceImpl()).build().start()
     logger.info("Server started, listening on " + port)
     Runtime.getRuntime.addShutdownHook(new Thread(() => {

@@ -2,15 +2,16 @@ package pers.cyz.bigdatatool.node.core.flower
 
 import io.grpc.stub.StreamObserver
 import io.grpc.{ManagedChannel, ManagedChannelBuilder}
+import org.slf4j.LoggerFactory
 import pers.cyz.bigdatatool.node.common.config.SystemConfig
 import pers.cyz.bigdatatool.node.grpc.com.{ConnectGrpc, RegisterRequest, RegisterResponse}
 
 import java.lang.Thread.sleep
-import java.util.logging.Logger
+
 
 class FlowerClient {
-  private val logger = Logger.getLogger(classOf[FlowerClient].getName)
-  val channel: ManagedChannel = ManagedChannelBuilder.forAddress("localhost", 50056).usePlaintext().build()
+  private val logger = LoggerFactory.getLogger(classOf[FlowerClient])
+  val channel: ManagedChannel = ManagedChannelBuilder.forAddress("localhost", 50055).usePlaintext().build()
   val stub: ConnectGrpc.ConnectBlockingStub = ConnectGrpc.newBlockingStub(channel)
   val asyncStub: ConnectGrpc.ConnectStub = ConnectGrpc.newStub(channel)
 
@@ -24,7 +25,7 @@ class FlowerClient {
       }
 
       override def onError(throwable: Throwable): Unit = {
-        logger.info("Error")
+        logger.error("Error")
       }
 
       override def onCompleted(): Unit = {

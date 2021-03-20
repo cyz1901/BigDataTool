@@ -10,9 +10,9 @@ object flowerNodeTest {
     new Loader[AppConfig.type]().Builder
       .setLoaderType(Yaml)
       .setConfigFilePath("node/src/main/resource/etc/node.yml").build().fileToObjMapping()
-//    val node = new FlowerNode()
-//    node.run()
-    println(AppConfig.repository.url)
+    val node = FlowerNode
+    node.run()
+//    println(AppConfig.repository.url)
 //    println(UrlUtils.getUrl("hadoop","123456"))
 //    println(SystemConfig.compressedFormat)
 //    println(SystemConfig.localHostIp)

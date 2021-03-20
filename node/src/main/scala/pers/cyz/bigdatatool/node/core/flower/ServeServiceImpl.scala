@@ -1,19 +1,17 @@
 package pers.cyz.bigdatatool.node.core.flower
 
 import io.grpc.stub.StreamObserver
+import org.slf4j.LoggerFactory
 import pers.cyz.bigdatatool.node.common.utils.UrlUtils
 import pers.cyz.bigdatatool.node.core.download.DownloadExecutor
 import pers.cyz.bigdatatool.node.grpc.com.{DownloadComponentRequest, DownloadComponentResponse, ServeGrpc, editFileRequest, editFileResponse}
 
 import java.lang.Thread.sleep
 import java.net.URL
-import java.util.concurrent.TimeUnit
-import java.util.logging.Logger
 import scala.collection.mutable.ArrayBuffer
 
 class ServeServiceImpl extends ServeGrpc.ServeImplBase {
-
-  private val logger = Logger.getLogger(classOf[ServeServiceImpl].getName)
+  private val logger = LoggerFactory.getLogger(classOf[ServeServiceImpl])
 
 //  override def register(request: RegisterRequest, responseObserver: StreamObserver[RegisterResponse]): Unit = {
 //    @volatile var lock = true
@@ -33,7 +31,6 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
 
 
   override def downloadComponent(responseObserver: StreamObserver[DownloadComponentResponse]): StreamObserver[DownloadComponentRequest] = {
-
     new StreamObserver[DownloadComponentRequest] {
       override def onNext(v: DownloadComponentRequest): Unit = {
         v.getCommandType match {
@@ -59,7 +56,7 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
       }
 
       override def onError(throwable: Throwable): Unit = {
-        logger.warning(throwable.toString)
+        logger.error(throwable.toString)
       }
 
       override def onCompleted(): Unit = {
