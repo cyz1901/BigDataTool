@@ -10,7 +10,7 @@ service Connect{
 
 service Serve{
   rpc downloadComponent(stream DownloadComponentRequest) returns (stream DownloadComponentResponse);
-  rpc editFile(editFileRequest) returns (editFileResponse);
+  rpc deploy(deployRequest) returns (stream deployResponse);
 }
 
 // Connect
@@ -37,13 +37,12 @@ message DownloadComponentResponse {
   int64 alreadyDownloadSize = 2;
 }
 
-// editFile
-message editFileRequest {
-  string filePath = 1;
-  string operationType = 2;
-  string text = 3;
+// deploy
+message deployRequest {
+  string msg = 1;
+  map<string, string> componentMap = 2;
 }
 
-message editFileResponse {
+message deployResponse {
   string message = 1;
 }

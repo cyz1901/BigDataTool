@@ -4,10 +4,11 @@ import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
 import pers.cyz.bigdatatool.node.common.utils.UrlUtils
 import pers.cyz.bigdatatool.node.core.download.DownloadExecutor
-import pers.cyz.bigdatatool.node.grpc.com.{DownloadComponentRequest, DownloadComponentResponse, ServeGrpc, editFileRequest, editFileResponse}
+import pers.cyz.bigdatatool.node.grpc.com.{DownloadComponentRequest, DownloadComponentResponse, ServeGrpc, deployRequest, deployResponse}
 
 import java.lang.Thread.sleep
 import java.net.URL
+import sys.process._
 import scala.collection.mutable.ArrayBuffer
 
 class ServeServiceImpl extends ServeGrpc.ServeImplBase {
@@ -65,9 +66,15 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
     }
   }
 
+  /**
+   */
+  override def deploy(request: deployRequest, responseObserver: StreamObserver[deployResponse]): Unit = {
+    //部署逻辑 flowerNode
+    // 解压
+    request.getComponentMapMap.forEach((key,value)=>{
+      val res = s"tar xvf ${key}-${value}".!
+    })
 
-  override def editFile(request: editFileRequest, responseObserver: StreamObserver[editFileResponse]): Unit = {
-    super.editFile(request, responseObserver)
+    val loader = new Loader[]
   }
-
 }
