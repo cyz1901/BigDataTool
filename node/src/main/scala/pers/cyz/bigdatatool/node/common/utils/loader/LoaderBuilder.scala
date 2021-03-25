@@ -114,19 +114,19 @@ class Loader[T: ClassTag] {
     }
   }
 
-    class XmlLoad(
-                   override var configFilePath: String = null
-                 ) extends Load[T] {
-
-      val reader: SAXReader = new SAXReader();
-
-      override def load(): T = {
-        //2、调用read方法
-        var doc: Document = reader.read(new File(configFilePath));
-        //3、获取根元素
-        var root: Element = doc.getRootElement; //books
-      }
-    }
+//    class XmlLoad(
+//                   override var configFilePath: String = null
+//                 ) extends Load[T] {
+//
+//      val reader: SAXReader = new SAXReader();
+//
+//      override def load(): T = {
+//        //2、调用read方法
+//        var doc: Document = reader.read(new File(configFilePath));
+//        //3、获取根元素
+//        var root: Element = doc.getRootElement; //books
+//      }
+//    }
 
 }
 
