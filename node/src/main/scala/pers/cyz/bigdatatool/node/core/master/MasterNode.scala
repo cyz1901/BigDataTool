@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory
 import pers.cyz.bigdatatool.node.common.config.AppConfig
 import pers.cyz.bigdatatool.node.common.pojo.RuntimeMeta
 import pers.cyz.bigdatatool.node.core.distributed.Node
-import pers.cyz.bigdatatool.node.grpc.com.{ServeGrpc}
+import pers.cyz.bigdatatool.node.grpc.com.ServeGrpc
 import pers.cyz.bigdatatool.node.uiservice.UiServiceApplication
 
 import java.lang.Thread.sleep

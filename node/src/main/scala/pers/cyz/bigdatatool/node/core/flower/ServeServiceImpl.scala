@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 import pers.cyz.bigdatatool.node.common.config.{AppConfig, SystemConfig}
 import pers.cyz.bigdatatool.node.common.utils.UrlUtils
 import pers.cyz.bigdatatool.node.core.download.DownloadExecutor
-import pers.cyz.bigdatatool.node.grpc.com.{DownloadComponentRequest, DownloadComponentResponse, ServeGrpc, deployRequest, deployResponse}
+import pers.cyz.bigdatatool.node.grpc.com.{DeployRequest, DeployResponse, DownloadComponentRequest, DownloadComponentResponse, ServeGrpc}
 
 import java.io.{BufferedWriter, File, FileWriter}
 import java.lang.Thread.sleep
@@ -17,23 +17,6 @@ import scala.collection.mutable.ArrayBuffer
 
 class ServeServiceImpl extends ServeGrpc.ServeImplBase {
   private val logger = LoggerFactory.getLogger(classOf[ServeServiceImpl])
-
-  //  override def register(request: RegisterRequest, responseObserver: StreamObserver[RegisterResponse]): Unit = {
-  //    @volatile var lock = true
-  //
-  //    while (lock) {
-  //      val response: RegisterResponse = RegisterResponse.newBuilder().setStatus(
-  //        FlowerStatus.newBuilder()
-  //          .setIp(FlowerStatusObj.ip)
-  //          .setStatus(FlowerStatusObj.status).build()
-  //      ).build()
-  //      responseObserver.onNext(response)
-  //      TimeUnit.SECONDS.sleep(10)
-  //    }
-  //    responseObserver.onCompleted()
-  //
-  //  }
-
 
   override def downloadComponent(responseObserver: StreamObserver[DownloadComponentResponse]): StreamObserver[DownloadComponentRequest] = {
     new StreamObserver[DownloadComponentRequest] {
@@ -72,47 +55,85 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
 
   /**
    */
-  override def deploy(request: deployRequest, responseObserver: StreamObserver[deployResponse]): Unit = {
+  override def deploy(request: DeployRequest, responseObserver: StreamObserver[DeployResponse]): Unit = {
     import java.io.FileWriter
 
-    def findProperty(root: Element, name: String, value: String): Unit = {
-      val i = root.elementIterator("property")
-      while ( {
-        i.hasNext
-      }) {
-        val foo = i.next.asInstanceOf[Element]
-        if (foo.element("name").getData == name) {
-          val aa = foo.element("name").getParent.element("value")
-          aa.setText(value)
-        }
+    logger.info("deploy")
+
+    def editProperty(root: Element, name: String, value: String): Unit = {
+
+      def addProperty(root: Element, name: String, value: String): Unit = {
+        val p = root.addElement("property")
+        val n = p.addElement("name")
+        n.setText(name)
+        val v = p.addElement("value")
+        v.setText(value)
+      }
+
+      val list = root.selectNodes("property").asInstanceOf[java.util.List[Element]]
+      println(list)
+      if (list.isEmpty) {
+        addProperty(root, name, value)
+      } else {
+        list.forEach(x=>{
+          if (x.element("name").getData == name){
+            x.element("value").setText(value)
+          }else{
+            addProperty(root, name, value)
+          }
+        })
       }
     }
 
     val reader: SAXReader = new SAXReader()
+
     //部署逻辑 flowerNode
     request.getComponentMapMap.forEach((key, value) => {
       //解压
-      val res = s"tar xvf ${key}-${value}".!
+//      val streamLogger = new ProcessLogger {
+//        override def out(s: => String): Unit = ???
+//
+//        override def err(s: => String): Unit = ???
+//
+//        override def buffer[T](f: => T): T = ???
+//      }
+      val process = Seq("tar","xvf",s"/home/cyz/BDMData/${key}-${value}.tar.gz","-C","/home/cyz/BDMData/").!!
+//      val p = process run new ProcessIO()
+//        p.exitValue()
+//      )
+//      println(process)
 
       //配置配置文件(hadoop-env.sh)
       val bufferWriter: BufferedWriter = new BufferedWriter(new FileWriter(s"${SystemConfig.userHomePath}" +
-        s"/BDMData/$key-$value/etc/hadoop/hadoop-env.sh"))
+        s"/BDMData/$key-$value/etc/hadoop/hadoop-env.sh",true))
       bufferWriter.write(s"JAVA_HOME=${System.getProperty("java.home")}")
       bufferWriter.close()
 
-      //配置文件(core.site)
+      //配置文件(core-site.xml)
+      var nameNode = ""
+      request.getNodeMapMap.forEach((key,value)=>{
+        if (value == "nameNode") {
+          nameNode = key
+        }
+      })
       val docCore: Document = reader.read(new File(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
         s"etc/hadoop/core-site.xml"));
-      findProperty(docCore.getRootElement, "fs.defaultFS", "hello")
-      val writer = new XMLWriter(new FileWriter(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
+      editProperty(docCore.getRootElement, "fs.defaultFS", s"hdfs://$nameNode:9000")
+      editProperty(docCore.getRootElement, "hadoop.tmp.dir", s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
+        s"data/tmp")
+      val writerCore = new XMLWriter(new FileWriter(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
         s"etc/hadoop/core-site.xml"))
-      writer.write(docCore)
-      writer.close()
+      writerCore.write(docCore)
+      writerCore.close()
 
       //配置文件(hdfs-site.xml)
       val docHdfs: Document = reader.read(new File(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
         s"etc/hadoop/hdfs-site.xml"));
-      findProperty(docHdfs.getRootElement, "dfs.replication", AppConfig.serve.nodeCount.toString)
+      editProperty(docHdfs.getRootElement, "dfs.replication", AppConfig.serve.nodeCount.toString)
+      val writerHdfs = new XMLWriter(new FileWriter(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
+        s"etc/hadoop/hdfs-site.xml"))
+      writerHdfs.write(docCore)
+      writerHdfs.close()
 
 //      //配置文件(yarn-env.sh)
 //      val bufferWriterYarn: BufferedWriter = new BufferedWriter(new FileWriter(s"${SystemConfig.userHomePath}" +

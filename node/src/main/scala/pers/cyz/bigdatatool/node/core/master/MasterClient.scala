@@ -4,7 +4,7 @@ import io.grpc.ManagedChannel
 import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
 import pers.cyz.bigdatatool.node.common.pojo.LayerDownloadService
-import pers.cyz.bigdatatool.node.grpc.com.{DownloadComponentRequest, DownloadComponentResponse, ServeGrpc}
+import pers.cyz.bigdatatool.node.grpc.com.{DeployRequest, DeployResponse, DownloadComponentRequest, DownloadComponentResponse, ServeGrpc}
 import pers.cyz.bigdatatool.node.uiservice.controller.DownloadController
 
 
@@ -45,6 +45,31 @@ class MasterClient(
     val grpcRequest: StreamObserver[DownloadComponentRequest] = asyncStub.downloadComponent(grpcResponse)
 
     grpcRequest.onNext(DownloadComponentRequest.newBuilder().putAllComponentMap(map).setCommandType("start").build())
+  }
+
+
+  def invokeDeploy(nodeMap: java.util.Map[String, String],
+                   componentMap: java.util.Map[String, String],
+                   deployType: String) {
+
+    val grpcResponse: StreamObserver[DeployResponse] = new StreamObserver[DeployResponse] {
+      override def onNext(v: DeployResponse): Unit = {
+        logger.info(s"message is ${v.getMessage}")
+      }
+
+      override def onError(throwable: Throwable): Unit = {
+        logger.error(s"Error ${throwable}")
+      }
+
+      override def onCompleted(): Unit = {
+        logger.info("Completed")
+      }
+    }
+
+    val grpcRequest: DeployRequest = DeployRequest.newBuilder().putAllComponentMap(componentMap).putAllNodeMap(nodeMap)
+      .setMsg("start").setType(deployType).build()
+
+    asyncStub.deploy(grpcRequest,grpcResponse)
   }
 
 

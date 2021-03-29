@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import pers.cyz.bigdatatool.node.core.master.MasterNode
-import pers.cyz.bigdatatool.node.uiservice.pojo.{ComponentDownloadData, DownloadMsgData}
+import pers.cyz.bigdatatool.node.uiservice.pojo.{ComponentDownloadData, DeployData, DownloadMsgData}
 
 import java.lang.Thread.sleep
 import java.util
@@ -33,7 +33,31 @@ class DeployController {
 
 
   @OnMessage def onMessage(message: String, session: Session): Unit = {
+    val requestMsg: DeployData = om.readValue(
+      message,
+      classOf[DeployData])
+    //    println(requestMsg.getNodeData)
+    val nodeMap: util.Map[String, String] = new util.HashMap[String, String]()
+    requestMsg.getNodeData.forEach(x => {
+      nodeMap.put(x.getHostname, x.getNodeType)
+    })
 
+    val componentMap: util.Map[String, String] = new util.HashMap[String, String]()
+    requestMsg.getComponentData.forEach(x => {
+      componentMap.put(x.getName, x.getVersion)
+    })
+    logger.info(nodeMap.size().toString)
+    logger.info(componentMap.size().toString)
+
+    MasterNode.masterClientArray.foreach(client => {
+      val thr = new Thread() {
+        override def run(): Unit = {
+          client.invokeDeploy(nodeMap, componentMap, requestMsg.getDeployType)
+        }
+      }
+      thr.setName(client.getClass.toString)
+      thr.start()
+    })
   }
 
 
@@ -48,21 +72,8 @@ class DeployController {
   import java.io.IOException
 
   @throws[IOException]
-  def sendMessage(totalSize: Long,
-                  alreadyDownloadSize: Long,
-                  totalComponents: Int,
-                  nowComponents: Int,
-                  status: String): Unit = {
-    val downloadNodeList: util.ArrayList[DownloadMsgData.ListData] = new util.ArrayList[DownloadMsgData.ListData]()
-    downloadNodeList.add(new DownloadMsgData.ListData("node1", 7, 4))
-    val msg: DownloadMsgData = new DownloadMsgData(
-      new DownloadMsgData.AllData(
-        totalComponents, nowComponents, totalSize, alreadyDownloadSize
-      ),
-      downloadNodeList,
-      status
-    )
-    this.session.getBasicRemote.sendText(om.writeValueAsString(msg))
+  def sendMessage(): Unit = {
+    //    this.session.getBasicRemote.sendText(om.writeValueAsString(msg))
   }
 
 

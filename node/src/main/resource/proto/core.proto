@@ -10,7 +10,7 @@ service Connect{
 
 service Serve{
   rpc downloadComponent(stream DownloadComponentRequest) returns (stream DownloadComponentResponse);
-  rpc deploy(deployRequest) returns (stream deployResponse);
+  rpc deploy(DeployRequest) returns (stream DeployResponse);
 }
 
 // Connect
@@ -38,11 +38,13 @@ message DownloadComponentResponse {
 }
 
 // deploy
-message deployRequest {
+message DeployRequest {
   string msg = 1;
-  map<string, string> componentMap = 2;
+  string type = 2;
+  map<string, string> componentMap = 3;
+  map<string, string> nodeMap = 4;
 }
 
-message deployResponse {
+message DeployResponse {
   string message = 1;
 }

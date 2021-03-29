@@ -5,21 +5,35 @@ import pers.cyz.bigdatatool.node.common.config.SystemConfig
 import java.io.{BufferedWriter, File, FileWriter, Writer}
 import java.nio.file.Paths
 import sys.process._
+import scala.collection.JavaConverters._
 
 object ShellTest {
 
 
-  def findProperty(root: Element, name: String): Unit = {
-    val i = root.elementIterator("property")
-    while ( {
-      i.hasNext
-    }) {
-      val foo = i.next.asInstanceOf[Element]
-      if (foo.element("name").getData == name) {
-        val aa = foo.element("name").getParent.element("value")
-        aa.setText("hello")
-        println(aa.getData)
-      }
+
+
+  def editProperty(root: Element, name: String, value: String): Unit = {
+
+    def addProperty(root: Element, name: String, value: String): Unit = {
+      val p = root.addElement("property")
+      val n = p.addElement("name")
+      n.setText(name)
+      val v = p.addElement("value")
+      v.setText(value)
+    }
+
+    val list = root.selectNodes("property").asInstanceOf[java.util.List[Element]]
+    println(list)
+    if (list.isEmpty) {
+      addProperty(root, name, value)
+    } else {
+      list.forEach(x=>{
+        if (x.element("name").getData == name){
+          x.element("value").setText(value)
+        }else{
+          addProperty(root, name, value)
+        }
+      })
     }
   }
 
@@ -35,13 +49,14 @@ object ShellTest {
 
     val reader: SAXReader = new SAXReader()
     var doc: Document = reader.read(new File(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
-      s"etc/hadoop/core-site.xml"));
+      s"etc/hadoop/core-site.xml"))
     val root = doc.getRootElement
-    findProperty(root,"fs.defaultFS")
+    editProperty(root, "fs.defaultFS","222")
     import java.io.FileWriter
     val writer = new XMLWriter(new FileWriter(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
       s"etc/hadoop/core-site.xml"))
     writer.write(doc) // 向流写入数据
+    println(root)
     writer.close()
 
     //    doc.write()
