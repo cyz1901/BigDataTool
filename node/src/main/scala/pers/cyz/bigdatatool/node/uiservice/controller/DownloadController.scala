@@ -9,6 +9,7 @@ import pers.cyz.bigdatatool.node.uiservice.pojo.{ComponentDownloadData, Download
 
 import java.lang.Thread.sleep
 import java.util
+import java.util.EventObject
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 import javax.websocket.{OnClose, OnError, OnMessage, OnOpen, Session}

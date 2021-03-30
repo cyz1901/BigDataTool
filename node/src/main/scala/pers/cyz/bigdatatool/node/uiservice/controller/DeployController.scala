@@ -5,10 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import pers.cyz.bigdatatool.node.core.master.MasterNode
-import pers.cyz.bigdatatool.node.uiservice.pojo.{ComponentDownloadData, DeployData, DownloadMsgData}
+import pers.cyz.bigdatatool.node.uiservice.controller.DeployController.setMessage
+import pers.cyz.bigdatatool.node.uiservice.pojo.{ComponentDownloadData, DeployData, DeployMsgData, DownloadMsgData}
 
 import java.lang.Thread.sleep
 import java.util
+import java.util.EventObject
+import java.util.concurrent.locks.ReentrantLock
 import javax.websocket.{OnClose, OnError, OnMessage, OnOpen, Session}
 import javax.websocket.server.ServerEndpoint
 import scala.util.control.Breaks.{break, breakable}
@@ -19,6 +22,16 @@ class DeployController {
   private val logger = LoggerFactory.getLogger(classOf[DeployController])
   private var session: Session = _
   val om: ObjectMapper = new ObjectMapper()
+  DeployController.de = this
+
+  class OnMessageListener extends EventObject {
+
+    import java.util.EventObject
+
+    def onEvent(e: EventObject): Unit = {
+      System.out.println("event come")
+    }
+  }
 
   @OnOpen def onOpen(session: Session): Unit = {
     this.session = session
@@ -58,6 +71,10 @@ class DeployController {
       thr.setName(client.getClass.toString)
       thr.start()
     })
+
+//    DeployController.waiting(this)
+
+
   }
 
 
@@ -72,9 +89,49 @@ class DeployController {
   import java.io.IOException
 
   @throws[IOException]
-  def sendMessage(): Unit = {
-    //    this.session.getBasicRemote.sendText(om.writeValueAsString(msg))
+  def sendMessage(
+                   message: String,
+                   status: String,
+                   step: String
+                 ): Unit = {
+    val msg: DeployMsgData = new DeployMsgData()
+    status match {
+      case null =>
+        msg.setStatus("defeat")
+      case "working" =>
+        msg.setStatus("defeat")
+      case "finish" =>
+        msg.setStatus("success")
+    }
+    msg.setSubtitle(message)
+    msg.setTitle(step)
+    this.session.getBasicRemote.sendText(om.writeValueAsString(msg))
   }
+}
 
+// 没有实现分布式信息传送的竞争
+object DeployController {
+  private val logger = LoggerFactory.getLogger(classOf[DeployController.type])
+  var message: String = _
+  var status: String = _
+  var step: String = _
+  var de: DeployController = _
+
+  private val lock = new ReentrantLock()
+
+  def setMessage(message: String, status: String, step: String): Unit = {
+
+    try {
+      lock.lock()
+      this.message = message
+      this.status = status
+      this.step = step
+      de.sendMessage(message,status,step)
+    } catch {
+      case e: Throwable => logger.error(e.toString)
+    } finally {
+      lock.unlock()
+    }
+  }
 
 }

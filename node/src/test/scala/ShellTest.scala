@@ -1,6 +1,7 @@
 import org.dom4j.{Document, Element}
 import org.dom4j.io.{SAXReader, XMLWriter}
 import pers.cyz.bigdatatool.node.common.config.SystemConfig
+import pers.cyz.bigdatatool.node.common.utils.IpUtils
 
 import java.io.{BufferedWriter, File, FileWriter, Writer}
 import java.nio.file.Paths
@@ -47,18 +48,18 @@ object ShellTest {
     //    bufferWriter.close()
 
 
-    val reader: SAXReader = new SAXReader()
-    var doc: Document = reader.read(new File(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
-      s"etc/hadoop/core-site.xml"))
-    val root = doc.getRootElement
-    editProperty(root, "fs.defaultFS","222")
-    import java.io.FileWriter
-    val writer = new XMLWriter(new FileWriter(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
-      s"etc/hadoop/core-site.xml"))
-    writer.write(doc) // 向流写入数据
-    println(root)
-    writer.close()
-
+//    val reader: SAXReader = new SAXReader()
+//    var doc: Document = reader.read(new File(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
+//      s"etc/hadoop/core-site.xml"))
+//    val root = doc.getRootElement
+//    editProperty(root, "fs.defaultFS","222")
+//    import java.io.FileWriter
+//    val writer = new XMLWriter(new FileWriter(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
+//      s"etc/hadoop/core-site.xml"))
+//    writer.write(doc) // 向流写入数据
+//    println(root)
+//    writer.close()
+    println(IpUtils.getLocalName)
     //    doc.write()
     //    println(root)
 

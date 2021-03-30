@@ -2,7 +2,7 @@ package pers.cyz.bigdatatool.node.core.flower
 
 import io.grpc.stub.StreamObserver
 import org.dom4j.{Document, Element}
-import org.dom4j.io.{SAXReader, XMLWriter}
+import org.dom4j.io.{OutputFormat, SAXReader, XMLWriter}
 import org.slf4j.LoggerFactory
 import pers.cyz.bigdatatool.node.common.config.{AppConfig, SystemConfig}
 import pers.cyz.bigdatatool.node.common.utils.UrlUtils
@@ -71,14 +71,13 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
       }
 
       val list = root.selectNodes("property").asInstanceOf[java.util.List[Element]]
-      println(list)
       if (list.isEmpty) {
         addProperty(root, name, value)
       } else {
-        list.forEach(x=>{
-          if (x.element("name").getData == name){
+        list.forEach(x => {
+          if (x.element("name").getData == name) {
             x.element("value").setText(value)
-          }else{
+          } else {
             addProperty(root, name, value)
           }
         })
@@ -87,62 +86,72 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
 
     val reader: SAXReader = new SAXReader()
 
+
     //部署逻辑 flowerNode
     request.getComponentMapMap.forEach((key, value) => {
       //解压
-//      val streamLogger = new ProcessLogger {
-//        override def out(s: => String): Unit = ???
-//
-//        override def err(s: => String): Unit = ???
-//
-//        override def buffer[T](f: => T): T = ???
-//      }
-      val process = Seq("tar","xvf",s"/home/cyz/BDMData/${key}-${value}.tar.gz","-C","/home/cyz/BDMData/").!!
-//      val p = process run new ProcessIO()
-//        p.exitValue()
-//      )
-//      println(process)
+      responseObserver.onNext(DeployResponse.newBuilder().setStep("extract").setStatus("working").setMessage("正在解压完毕").build())
+      val process = Seq("tar", "xvf", s"${SystemConfig.userHomePath}/BDMData/${key}-${value}.tar.gz", "-C", "/home/cyz/BDMData/").!!
+      responseObserver.onNext(DeployResponse.newBuilder().setStep("extract").setStatus("finish").setMessage("已经解压完毕").build())
+
+      //设置格式
+      val format: OutputFormat = new OutputFormat()
+      format.setExpandEmptyElements(true)
+      format.setIndentSize(8) // 行缩进
+      format.setNewlines(true) // 一个结点为一行
 
       //配置配置文件(hadoop-env.sh)
+      responseObserver.onNext(DeployResponse.newBuilder().setStep("configure").setStatus("working").setMessage("配置文件(hadoop-env.sh)").build())
       val bufferWriter: BufferedWriter = new BufferedWriter(new FileWriter(s"${SystemConfig.userHomePath}" +
-        s"/BDMData/$key-$value/etc/hadoop/hadoop-env.sh",true))
-      bufferWriter.write(s"JAVA_HOME=${System.getProperty("java.home")}")
+        s"/BDMData/$key-$value/etc/hadoop/hadoop-env.sh", true))
+      bufferWriter.write(s"export JAVA_HOME=${System.getProperty("java.home")}")
       bufferWriter.close()
 
       //配置文件(core-site.xml)
+      responseObserver.onNext(DeployResponse.newBuilder().setStep("configure").setStatus("working").setMessage("配置文件(core-site.xml)").build())
       var nameNode = ""
-      request.getNodeMapMap.forEach((key,value)=>{
+      request.getNodeMapMap.forEach((key, value) => {
         if (value == "nameNode") {
           nameNode = key
         }
       })
+      println(s"nameNode is ${request.getNodeMapMap}")
       val docCore: Document = reader.read(new File(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
         s"etc/hadoop/core-site.xml"));
       editProperty(docCore.getRootElement, "fs.defaultFS", s"hdfs://$nameNode:9000")
       editProperty(docCore.getRootElement, "hadoop.tmp.dir", s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
         s"data/tmp")
       val writerCore = new XMLWriter(new FileWriter(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
-        s"etc/hadoop/core-site.xml"))
+        s"etc/hadoop/core-site.xml"), format)
       writerCore.write(docCore)
       writerCore.close()
 
       //配置文件(hdfs-site.xml)
+      responseObserver.onNext(DeployResponse.newBuilder().setStep("configure").setStatus("working").setMessage("配置文件(hdfs-site.xml)").build())
       val docHdfs: Document = reader.read(new File(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
         s"etc/hadoop/hdfs-site.xml"));
       editProperty(docHdfs.getRootElement, "dfs.replication", AppConfig.serve.nodeCount.toString)
       val writerHdfs = new XMLWriter(new FileWriter(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
-        s"etc/hadoop/hdfs-site.xml"))
+        s"etc/hadoop/hdfs-site.xml"), format)
       writerHdfs.write(docCore)
       writerHdfs.close()
+      responseObserver.onNext(DeployResponse.newBuilder().setStep("configure").setStatus("finish").setMessage("配置完成").build())
 
-//      //配置文件(yarn-env.sh)
-//      val bufferWriterYarn: BufferedWriter = new BufferedWriter(new FileWriter(s"${SystemConfig.userHomePath}" +
-//        s"/BDMData/$key-$value/etc/hadoop/hadoop-env.sh"))
-//      bufferWriterYarn.write(s"JAVA_HOME=${System.getProperty("java.home")}")
-//      bufferWriterYarn.close()
+      //      //配置文件(yarn-env.sh)
+      //      val bufferWriterYarn: BufferedWriter = new BufferedWriter(new FileWriter(s"${SystemConfig.userHomePath}" +
+      //        s"/BDMData/$key-$value/etc/hadoop/hadoop-env.sh"))
+      //      bufferWriterYarn.write(s"JAVA_HOME=${System.getProperty("java.home")}")
+      //      bufferWriterYarn.close()
 
       //      var doc: Document = reader.read(new File(s"${SystemConfig.userHomePath}/BDMData/$key-$value" +
       //        s"${System.getProperty("java.home")}"));
+
+      if (SystemConfig.localHostName == "Computer"){
+        val process_1 = s"${SystemConfig.userHomePath}/BDMData/${key}-${value}/bin/hdfs namenode -format".!!
+        println(process_1)
+      }
+      responseObserver.onNext(DeployResponse.newBuilder().setStep("init").setStatus("finish").setMessage("初始化NameNode已完成").build())
+      responseObserver.onNext(DeployResponse.newBuilder().setStep("close").setStatus("finish").setMessage("close").build())
     })
   }
 }

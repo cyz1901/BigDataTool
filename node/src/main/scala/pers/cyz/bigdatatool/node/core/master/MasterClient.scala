@@ -5,7 +5,7 @@ import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
 import pers.cyz.bigdatatool.node.common.pojo.LayerDownloadService
 import pers.cyz.bigdatatool.node.grpc.com.{DeployRequest, DeployResponse, DownloadComponentRequest, DownloadComponentResponse, ServeGrpc}
-import pers.cyz.bigdatatool.node.uiservice.controller.DownloadController
+import pers.cyz.bigdatatool.node.uiservice.controller.{DeployController, DownloadController}
 
 
 class MasterClient(
@@ -54,7 +54,7 @@ class MasterClient(
 
     val grpcResponse: StreamObserver[DeployResponse] = new StreamObserver[DeployResponse] {
       override def onNext(v: DeployResponse): Unit = {
-        logger.info(s"message is ${v.getMessage}")
+        DeployController.setMessage(v.getMessage,v.getStatus,v.getStep)
       }
 
       override def onError(throwable: Throwable): Unit = {
