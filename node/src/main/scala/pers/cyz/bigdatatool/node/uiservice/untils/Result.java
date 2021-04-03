@@ -4,6 +4,14 @@ public class Result {
     int code;
     Object data;
 
+    public Result() {
+    }
+
+    public Result(int code, Object data) {
+        this.code = code;
+        this.data = data;
+    }
+
     public Object getData() {
         return data;
     }

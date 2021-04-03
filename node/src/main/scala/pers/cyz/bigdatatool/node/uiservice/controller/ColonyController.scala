@@ -21,7 +21,7 @@ class ColonyController {
   @ResponseBody
   @RequestMapping(value = Array("v1/colony"))
   def responseNodes: Result = {
-    val res = new Result
+    val res = new Result()
     //初始化数据
     val nodesMsgList: util.ArrayList[ColonyObj.NodesMsgData] = new util.ArrayList[ColonyObj.NodesMsgData]()
     val componentMsgList: util.ArrayList[ColonyObj.ComponentMsgData] = new util.ArrayList[ColonyObj.ComponentMsgData]()
