@@ -1,4 +1,4 @@
-package pers.cyz.bigdatatool.node.uiservice.pojo;
+package pers.cyz.bigdatatool.node.uiservice.bean;
 
 import java.util.ArrayList;
 

@@ -1,13 +1,13 @@
-package pers.cyz.bigdatatool.node.uiservice.pojo;
+package pers.cyz.bigdatatool.node.uiservice.bean.vo;
 
 import java.util.ArrayList;
 
-public class DownloadMsgData{
-    DownloadMsgData.AllData allData;
+public class DownloadVo {
+    DownloadVo.AllData allData;
     ArrayList<ListData> listDataList;
     String status;
 
-    public DownloadMsgData(AllData allData, ArrayList<ListData> listDataList, String status) {
+    public DownloadVo(AllData allData, ArrayList<ListData> listDataList, String status) {
         this.allData = allData;
         this.listDataList = listDataList;
         this.status = status;

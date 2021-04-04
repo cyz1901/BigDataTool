@@ -4,7 +4,7 @@ package pers.cyz.bigdatatool.node.uiservice.dao
 import org.springframework.stereotype.Repository
 import pers.cyz.bigdatatool.node.common.config.SystemConfig
 import pers.cyz.bigdatatool.node.common.utils.FileUtils
-import pers.cyz.bigdatatool.node.uiservice.pojo.Clusters
+import pers.cyz.bigdatatool.node.uiservice.bean.Clusters
 
 import java.io.{File, FileInputStream, FileOutputStream, ObjectInputStream, ObjectOutputStream}
 

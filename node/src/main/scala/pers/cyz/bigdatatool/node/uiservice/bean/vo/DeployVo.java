@@ -1,6 +1,6 @@
-package pers.cyz.bigdatatool.node.uiservice.pojo;
+package pers.cyz.bigdatatool.node.uiservice.bean.vo;
 
-public class DeployMsgData {
+public class DeployVo {
 //    subtitle: '解压组件',
 //    title: '解压',
 //    status: 'defeat'
@@ -8,10 +8,10 @@ public class DeployMsgData {
     String title;
     String status;
 
-    public DeployMsgData() {
+    public DeployVo() {
     }
 
-    public DeployMsgData(String subtitle, String title, String status) {
+    public DeployVo(String subtitle, String title, String status) {
         this.subtitle = subtitle;
         this.title = title;
         this.status = status;

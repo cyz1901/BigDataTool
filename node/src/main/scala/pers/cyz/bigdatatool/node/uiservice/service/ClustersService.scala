@@ -3,7 +3,7 @@ package pers.cyz.bigdatatool.node.uiservice.service
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import pers.cyz.bigdatatool.node.uiservice.dao.ClustersDao
-import pers.cyz.bigdatatool.node.uiservice.pojo.Clusters
+import pers.cyz.bigdatatool.node.uiservice.bean.Clusters
 
 import scala.collection.mutable.ArrayBuffer
 

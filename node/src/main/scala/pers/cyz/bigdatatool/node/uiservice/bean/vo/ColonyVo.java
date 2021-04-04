@@ -1,16 +1,14 @@
-package pers.cyz.bigdatatool.node.uiservice.pojo;
-
-import scala.Array;
+package pers.cyz.bigdatatool.node.uiservice.bean.vo;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ColonyObj {
+public class ColonyVo {
 
     ArrayList<NodesMsgData> nodesMsgList;
     ArrayList<ComponentMsgData> componentMsgList;
 
-    public ColonyObj(ArrayList<NodesMsgData> nodesMsgList, ArrayList<ComponentMsgData> componentMsgList) {
+    public ColonyVo(ArrayList<NodesMsgData> nodesMsgList, ArrayList<ComponentMsgData> componentMsgList) {
         this.nodesMsgList = nodesMsgList;
         this.componentMsgList = componentMsgList;
     }

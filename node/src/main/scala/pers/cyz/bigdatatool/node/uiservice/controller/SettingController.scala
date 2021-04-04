@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.ResponseBody
 import pers.cyz.bigdatatool.node.common.config.AppConfig
 import pers.cyz.bigdatatool.node.common.utils.loader.Loader
 import pers.cyz.bigdatatool.node.common.utils.loader.LoaderType.Yaml
+import pers.cyz.bigdatatool.node.uiservice.bean.SetData
 import pers.cyz.bigdatatool.node.uiservice.untils.Result
-import pers.cyz.bigdatatool.node.uiservice.pojo.SetObj
 
 
 @Controller
@@ -22,7 +22,7 @@ class SettingController {
       .setConfigFilePath("node/src/main/resource/etc/node.yml").build()
     val xx: AppConfig.type = loader.fileToObjMapping()
     val res = new Result
-    res.setData(new SetObj("仓库地址", xx.repository.url))
+    res.setData(new SetData("仓库地址", xx.repository.url))
     res.setCode(200)
     res
   }

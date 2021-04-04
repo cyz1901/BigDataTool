@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import pers.cyz.bigdatatool.node.core.master.{MasterNode, MasterService}
-import pers.cyz.bigdatatool.node.uiservice.pojo.{ComponentDownloadData, DownloadMsgData}
+import pers.cyz.bigdatatool.node.uiservice.bean.ComponentDownloadData
+import pers.cyz.bigdatatool.node.uiservice.bean.vo.DownloadVo
 
 import java.lang.Thread.sleep
 import java.util
@@ -94,10 +95,10 @@ class DownloadController {
                   totalComponents: Int,
                   nowComponents: Int,
                   status: String): Unit = {
-    val downloadNodeList: util.ArrayList[DownloadMsgData.ListData] = new util.ArrayList[DownloadMsgData.ListData]()
-    downloadNodeList.add(new DownloadMsgData.ListData("node1", 7, 4))
-    val msg: DownloadMsgData = new DownloadMsgData(
-      new DownloadMsgData.AllData(
+    val downloadNodeList: util.ArrayList[DownloadVo.ListData] = new util.ArrayList[DownloadVo.ListData]()
+    downloadNodeList.add(new DownloadVo.ListData("node1", 7, 4))
+    val msg: DownloadVo = new DownloadVo(
+      new DownloadVo.AllData(
         totalComponents, nowComponents, totalSize, alreadyDownloadSize
       ),
       downloadNodeList,

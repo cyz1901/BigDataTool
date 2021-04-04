@@ -1,4 +1,4 @@
-package pers.cyz.bigdatatool.node.uiservice.pojo;
+package pers.cyz.bigdatatool.node.uiservice.bean;
 
 public class Clusters implements java.io.Serializable{
     String colonyName;

@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import pers.cyz.bigdatatool.node.core.master.MasterNode
+import pers.cyz.bigdatatool.node.uiservice.bean.vo.DeployVo
 import pers.cyz.bigdatatool.node.uiservice.controller.DeployController.setMessage
-import pers.cyz.bigdatatool.node.uiservice.pojo.{ComponentDownloadData, DeployData, DeployMsgData, DownloadMsgData}
+import pers.cyz.bigdatatool.node.uiservice.bean.{ComponentDownloadData, DeployData}
 
 import java.lang.Thread.sleep
 import java.util
@@ -94,7 +95,7 @@ class DeployController {
                    status: String,
                    step: String
                  ): Unit = {
-    val msg: DeployMsgData = new DeployMsgData()
+    val msg: DeployVo = new DeployVo()
     status match {
       case null =>
         msg.setStatus("defeat")

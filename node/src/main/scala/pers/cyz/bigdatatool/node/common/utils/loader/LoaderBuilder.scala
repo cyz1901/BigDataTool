@@ -2,8 +2,6 @@ package pers.cyz.bigdatatool.node.common.utils.loader
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import LoaderType.{Json, LoaderType, Yaml}
-import org.dom4j.{Document, Element}
-import org.dom4j.io.SAXReader
 import org.yaml.snakeyaml.constructor.Constructor
 
 import java.io.{File, FileInputStream}

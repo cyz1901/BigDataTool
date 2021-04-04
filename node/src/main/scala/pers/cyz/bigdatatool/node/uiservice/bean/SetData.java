@@ -1,10 +1,10 @@
-package pers.cyz.bigdatatool.node.uiservice.pojo;
+package pers.cyz.bigdatatool.node.uiservice.bean;
 
-public class SetObj {
+public class SetData {
     String name;
     String value;
 
-    public SetObj(String name, String value) {
+    public SetData(String name, String value) {
         this.name = name;
         this.value = value;
     }
