@@ -8,8 +8,9 @@ import pers.cyz.bigdatatool.node.common.config.{AppConfig, SystemConfig}
 import pers.cyz.bigdatatool.node.common.utils.UrlUtils
 import pers.cyz.bigdatatool.node.core.download.DownloadExecutor
 import pers.cyz.bigdatatool.node.grpc.com.{DeployRequest, DeployResponse, DownloadComponentRequest, DownloadComponentResponse, ServeGrpc}
+import pers.cyz.bigdatatool.node.uiservice.bean.Clusters
 
-import java.io.{BufferedWriter, File, FileWriter}
+import java.io.{BufferedWriter, File, FileOutputStream, FileWriter, ObjectOutputStream}
 import java.lang.Thread.sleep
 import java.net.URL
 import sys.process._
@@ -131,6 +132,7 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
       val docHdfs: Document = reader.read(new File(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
         s"etc/hadoop/hdfs-site.xml"));
       editProperty(docHdfs.getRootElement, "dfs.replication", AppConfig.serve.nodeCount.toString)
+      editProperty(docHdfs.getRootElement, "dfs.permissions.enabled", "false")
       val writerHdfs = new XMLWriter(new FileWriter(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
         s"etc/hadoop/hdfs-site.xml"), format)
       writerHdfs.write(docCore)
@@ -146,7 +148,9 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
       //      var doc: Document = reader.read(new File(s"${SystemConfig.userHomePath}/BDMData/$key-$value" +
       //        s"${System.getProperty("java.home")}"));
 
+      // TODO 改为master
       if (SystemConfig.localHostName == "Computer"){
+        // 初始化namenode
         val process_1 = s"${SystemConfig.userHomePath}/BDMData/${key}-${value}/bin/hdfs namenode -format".!!
         println(process_1)
       }

@@ -3,9 +3,13 @@ package pers.cyz.bigdatatool.node.core.master
 import io.grpc.ManagedChannel
 import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
+import pers.cyz.bigdatatool.node.common.config.SystemConfig
 import pers.cyz.bigdatatool.node.common.pojo.LayerDownloadService
 import pers.cyz.bigdatatool.node.grpc.com.{DeployRequest, DeployResponse, DownloadComponentRequest, DownloadComponentResponse, ServeGrpc}
+import pers.cyz.bigdatatool.node.uiservice.bean.Clusters
 import pers.cyz.bigdatatool.node.uiservice.controller.{DeployController, DownloadController}
+
+import java.io.{File, FileOutputStream, ObjectOutputStream}
 
 
 class MasterClient(
@@ -50,11 +54,13 @@ class MasterClient(
 
   def invokeDeploy(nodeMap: java.util.Map[String, String],
                    componentMap: java.util.Map[String, String],
-                   deployType: String) {
+                   deployType: String,
+                   colonyName: String
+                  ) {
 
     val grpcResponse: StreamObserver[DeployResponse] = new StreamObserver[DeployResponse] {
       override def onNext(v: DeployResponse): Unit = {
-        DeployController.setMessage(v.getMessage,v.getStatus,v.getStep)
+        DeployController.setMessage(v.getMessage, v.getStatus, v.getStep)
       }
 
       override def onError(throwable: Throwable): Unit = {
@@ -69,7 +75,22 @@ class MasterClient(
     val grpcRequest: DeployRequest = DeployRequest.newBuilder().putAllComponentMap(componentMap).putAllNodeMap(nodeMap)
       .setMsg("start").setType(deployType).build()
 
-    asyncStub.deploy(grpcRequest,grpcResponse)
+    // 序列化存储
+    val clustersAddr = new File(s"${SystemConfig.userHomePath}/BDMData/Meta/cluster")
+    val clusters: Clusters = new Clusters()
+
+    clusters.setColonyName(colonyName)
+    nodeMap.forEach((key, value) => {
+      if (value == "nameNode") {
+        clusters.setNameNodeName(key)
+      }
+    })
+
+    val oo = new ObjectOutputStream(new FileOutputStream(clustersAddr))
+    oo.writeObject(clusters)
+    oo.close()
+
+    asyncStub.deploy(grpcRequest, grpcResponse)
   }
 
 

@@ -1,6 +1,7 @@
 serve:
   masterName: Computer
   nodeCount: 1
+  metaAddress: Meta
 repository:
   url: https://mirrors.tuna.tsinghua.edu.cn
   downloadFile: metadata/

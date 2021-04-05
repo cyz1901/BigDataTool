@@ -36,6 +36,7 @@ class ClustersDao {
   def selectAllClusters(): Clusters = {
     val oi = new ObjectInputStream(new FileInputStream(this.clusters))
     val clusters: Clusters = oi.readObject().asInstanceOf[Clusters]
+    oi.close()
     clusters
   }
 

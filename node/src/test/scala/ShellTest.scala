@@ -2,7 +2,7 @@ import org.dom4j.{Document, Element}
 import org.dom4j.io.{SAXReader, XMLWriter}
 import pers.cyz.bigdatatool.node.common.config.SystemConfig
 import pers.cyz.bigdatatool.node.common.utils.IpUtils
-import pers.cyz.bigdatatool.node.uiservice.dao.{ClustersDao, ColonyOperationDao}
+import pers.cyz.bigdatatool.node.uiservice.dao.{ClustersDao}
 
 import java.io.{BufferedWriter, File, FileWriter, Writer}
 import java.nio.file.Paths
@@ -43,8 +43,8 @@ object ShellTest {
 //    val d = new ClustersDao()
 //    val aa = d.selectAllClusters()
 //    println(aa)
-    val client = new ColonyOperationDao()
-    client.getFileList()
+//    val client = new ColonyOperationDao()
+//    client.getFileList()
 
 
   }

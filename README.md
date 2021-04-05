@@ -24,7 +24,7 @@ BigDataTool主要由基于Vue.js的UI和基于gpc和SpringBoot的后端分布式
 ## 组件
 
 
-|      项目      |        介绍         |
-| :------------: | :-----------------: |
-| BigDataTool-UI | BigDataTool的前端UI |
+|                            项目                             |        介绍         |
+| :---------------------------------------------------------: | :-----------------: |
+| [BigDataTool-UI](https://github.com/cyz1901/BigDataTool-UI) | BigDataTool的前端UI |
 

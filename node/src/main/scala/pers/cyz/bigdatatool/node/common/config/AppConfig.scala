@@ -19,6 +19,7 @@ object AppConfig {
   object nodeConfig {
     var masterName: String = _
     var nodeCount: Int = _
+    var metaAddress: String = _
 
     def setMasterName(masterName: String): Unit = {
       this.masterName = masterName
@@ -26,6 +27,10 @@ object AppConfig {
 
     def setNodeCount(nodeCount: Int): Unit = {
       this.nodeCount = nodeCount
+    }
+
+    def setMetaAddress(metaAddress: String): Unit = {
+      this.metaAddress = metaAddress
     }
   }
 

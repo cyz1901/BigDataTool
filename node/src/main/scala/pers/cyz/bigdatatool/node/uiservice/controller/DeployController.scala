@@ -66,14 +66,14 @@ class DeployController {
     MasterNode.masterClientArray.foreach(client => {
       val thr = new Thread() {
         override def run(): Unit = {
-          client.invokeDeploy(nodeMap, componentMap, requestMsg.getDeployType)
+          client.invokeDeploy(nodeMap, componentMap, requestMsg.getDeployType, requestMsg.getColonyName)
         }
       }
       thr.setName(client.getClass.toString)
       thr.start()
     })
 
-//    DeployController.waiting(this)
+    //    DeployController.waiting(this)
 
 
   }
@@ -127,7 +127,7 @@ object DeployController {
       this.message = message
       this.status = status
       this.step = step
-      de.sendMessage(message,status,step)
+      de.sendMessage(message, status, step)
     } catch {
       case e: Throwable => logger.error(e.toString)
     } finally {

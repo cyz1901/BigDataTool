@@ -1,7 +1,7 @@
 package pers.cyz.bigdatatool.node.uiservice.bean.pojo;
 
 public class FileStatusPojo {
-    int accessTime;
+    long accessTime;
     long blockSize;
     int childrenNum;
     int fileId;
@@ -18,7 +18,7 @@ public class FileStatusPojo {
     public FileStatusPojo() {
     }
 
-    public FileStatusPojo(int accessTime, long blockSize, int childrenNum, int fileId, String group, long length, long modificationTime, String owner, String pathSuffix, int permission, int replication, int storagePolicy, String type) {
+    public FileStatusPojo(long accessTime, long blockSize, int childrenNum, int fileId, String group, long length, long modificationTime, String owner, String pathSuffix, int permission, int replication, int storagePolicy, String type) {
         this.accessTime = accessTime;
         this.blockSize = blockSize;
         this.childrenNum = childrenNum;
@@ -34,19 +34,11 @@ public class FileStatusPojo {
         this.type = type;
     }
 
-    public int getChildrenNum() {
-        return childrenNum;
-    }
-
-    public void setChildrenNum(int childrenNum) {
-        this.childrenNum = childrenNum;
-    }
-
-    public int getAccessTime() {
+    public long getAccessTime() {
         return accessTime;
     }
 
-    public void setAccessTime(int accessTime) {
+    public void setAccessTime(long accessTime) {
         this.accessTime = accessTime;
     }
 
@@ -56,6 +48,14 @@ public class FileStatusPojo {
 
     public void setBlockSize(long blockSize) {
         this.blockSize = blockSize;
+    }
+
+    public int getChildrenNum() {
+        return childrenNum;
+    }
+
+    public void setChildrenNum(int childrenNum) {
+        this.childrenNum = childrenNum;
     }
 
     public int getFileId() {
