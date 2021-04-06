@@ -1,16 +1,10 @@
 package pers.cyz.bigdatatool.node.uiservice.controller
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{GetMapping, PostMapping, PutMapping, RequestBody, RequestMapping, RequestParam, ResponseBody, RestController}
-import pers.cyz.bigdatatool.node.common.pojo.ComponentMap
-import pers.cyz.bigdatatool.node.uiservice.bean.vo.ColonyOperationVo
-import pers.cyz.bigdatatool.node.uiservice.bean.vo.ColonyVo.{ComponentMsgData, NodesMsgData}
+import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PostMapping, PutMapping, RequestBody, RequestMapping, RequestParam, ResponseBody, RestController}
 import pers.cyz.bigdatatool.node.uiservice.service.{ClustersService, ColonyOperationService}
 import pers.cyz.bigdatatool.node.uiservice.untils.Result
 
-import java.util
-import scala.jdk.CollectionConverters._
 
 
 @RestController
@@ -19,26 +13,34 @@ class ColonyOperationController {
 
 
   @RequestBody
-  @PutMapping(value = Array("v1/colonyOperation/colony"))
-  def operationColony(@RequestParam("operation") body: String): Result = {
+  @PutMapping(value = Array("v1/colonyOperation/colony/{operation}"))
+  def operationColony(@PathVariable("operation") operation: String): Result = {
     val result: Result = new Result()
-    println(body)
-    body match {
+    operation match {
       case "start" => {
-        colonyOperationService.startColony()
+        colonyOperationService.startColony() match {
+          case 1 => result.setData("alive")
+          case _ => result.setData("error")
+        }
       }
       case "stop" => {
-        colonyOperationService.stopColony()
+        colonyOperationService.stopColony() match {
+          case 1 => result.setData("stop")
+          case _ => result.setData("error")
+        }
       }
     }
+    println(s"noew result is ${result.getData}")
+    result.setCode(200)
     result
   }
 
   @RequestBody
-  @GetMapping(value = Array("v1/colonyOperation/file"))
-  def getFileList(): Result = {
+  @PutMapping(value = Array("v1/colonyOperation/file"))
+//  @GetMapping(value = Array("v1/colonyOperation/file"))
+  def getFileList(@RequestParam("fileAddr") body: String): Result = {
     val result: Result = new Result()
-    val re = colonyOperationService.getFileList()
+    val re = colonyOperationService.getFileList(body)
     result.setData(re)
     result.setCode(200)
     result
@@ -46,7 +48,15 @@ class ColonyOperationController {
 
   @RequestBody
   @GetMapping(value = Array("v1/colonyOperation/colony"))
-  def getColonyState(): Unit ={
-
+  def getColonyStatus: Result ={
+    val result: Result = new Result()
+    val re = colonyOperationService.getColonyStatus
+    result.setCode(200)
+    re match {
+      case "\"active\"" => result.setData("alive")
+      case "stop" => result.setData("stop")
+      case _ => result.setData("error")
+    }
+    result
   }
 }

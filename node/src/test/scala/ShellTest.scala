@@ -12,8 +12,6 @@ import scala.collection.JavaConverters._
 object ShellTest {
 
 
-
-
   def editProperty(root: Element, name: String, value: String): Unit = {
 
     def addProperty(root: Element, name: String, value: String): Unit = {
@@ -29,10 +27,10 @@ object ShellTest {
     if (list.isEmpty) {
       addProperty(root, name, value)
     } else {
-      list.forEach(x=>{
-        if (x.element("name").getData == name){
+      list.forEach(x => {
+        if (x.element("name").getData == name) {
           x.element("value").setText(value)
-        }else{
+        } else {
           addProperty(root, name, value)
         }
       })
@@ -40,12 +38,13 @@ object ShellTest {
   }
 
   def main(args: Array[String]): Unit = {
-//    val d = new ClustersDao()
-//    val aa = d.selectAllClusters()
-//    println(aa)
-//    val client = new ColonyOperationDao()
-//    client.getFileList()
-
+    //    val d = new ClustersDao()
+    //    val aa = d.selectAllClusters()
+    //    println(aa)
+    //    val client = new ColonyOperationDao()
+    //    client.getFileList()
+    Process("ls").###("ls -all").!
+    println("111")
 
   }
 }

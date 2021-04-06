@@ -135,7 +135,7 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
       editProperty(docHdfs.getRootElement, "dfs.permissions.enabled", "false")
       val writerHdfs = new XMLWriter(new FileWriter(s"${SystemConfig.userHomePath}/BDMData/hadoop-3.3.0/" +
         s"etc/hadoop/hdfs-site.xml"), format)
-      writerHdfs.write(docCore)
+      writerHdfs.write(docHdfs)
       writerHdfs.close()
       responseObserver.onNext(DeployResponse.newBuilder().setStep("configure").setStatus("finish").setMessage("配置完成").build())
 
