@@ -28,3 +28,16 @@ BigDataTool主要由基于Vue.js的UI和基于gpc和SpringBoot的后端分布式
 | :---------------------------------------------------------: | :-----------------: |
 | [BigDataTool-UI](https://github.com/cyz1901/BigDataTool-UI) | BigDataTool的前端UI |
 
+
+
+## Issue
+
+打包Jar包时（建议使用idea提供的功能，因为使用spring-boot-maven-plugin可能会造成反射功能不可用），需要在打包完时在jar包内的spring.factories加上项目spring-boot-autoconfigure-2.4.2.jar中spring.factories的# Auto Configure部分。
+
+在启动springboot时默认端口为8080若需要更改可以使用例如
+
+```shell
+java -Dserver.port=9999 -jar bigdatatool-service.jar
+```
+
+来改变spring监听的端口
