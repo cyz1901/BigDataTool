@@ -1,14 +1,14 @@
 package pers.cyz.bigdatatool.core.flower
 
 import io.grpc.{Server, ServerBuilder}
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import pers.cyz.bigdatatool.core.distributed.Node
 
 
 object FlowerNode extends Node {
   var node: Node = _
   var server: Server = _
-  private val logger = LoggerFactory.getLogger(classOf[FlowerNode.type])
+  private val logger : Logger= LoggerFactory.getLogger(classOf[FlowerNode.type ])
 
   override def run(): Unit = {
     val tt = new Thread(){
