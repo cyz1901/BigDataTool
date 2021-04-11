@@ -2,3 +2,8 @@ server:
   port: 8000
   servlet:
     context-path: /api
+spring:
+  # 最大文件大小
+  servlet.multipart.max-file-size: 700MB
+  # 最大请求大小
+  servlet.multipart.max-request-size: 715MB

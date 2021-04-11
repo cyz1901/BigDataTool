@@ -4,7 +4,7 @@ import io.grpc.ManagedChannel
 import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
 import pers.cyz.bigdatatool.common.config.SystemConfig
-import pers.cyz.bigdatatool.node.grpc.com.{DeployRequest, DeployResponse, DownloadComponentRequest, DownloadComponentResponse, ServeGrpc}
+import pers.cyz.bigdatatool.node.grpc.com.{DeployRequest, DeployResponse, DistributeComponentRequest, DistributeComponentResponse, DownloadComponentRequest, DownloadComponentResponse, ServeGrpc}
 import pers.cyz.bigdatatool.uiservice.bean.Clusters
 import pers.cyz.bigdatatool.uiservice.controller.{DeployController, DownloadController}
 import pers.cyz.bigdatatool.uiservice.controller.DeployController
@@ -49,6 +49,27 @@ class MasterClient(
     val grpcRequest: StreamObserver[DownloadComponentRequest] = asyncStub.downloadComponent(grpcResponse)
 
     grpcRequest.onNext(DownloadComponentRequest.newBuilder().putAllComponentMap(map).setCommandType("start").build())
+  }
+
+  // TODO 分发
+  def invokeDistribute(map: java.util.Map[String, String]): Unit = {
+    val grpcResponse: StreamObserver[DistributeComponentResponse] = new StreamObserver[DistributeComponentResponse] {
+      override def onNext(v: DistributeComponentResponse): Unit = {
+
+      }
+
+      override def onError(throwable: Throwable): Unit = {
+        logger.error(s"Error ${throwable}")
+      }
+
+      override def onCompleted(): Unit = {
+        logger.info("Completed")
+      }
+    }
+
+    val grpcRequest: StreamObserver[DistributeComponentRequest] = asyncStub.distributeComponent(grpcResponse)
+
+    grpcRequest.onNext(DistributeComponentRequest.newBuilder().setFileName("haha").setMsg("start").build())
   }
 
 

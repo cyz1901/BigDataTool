@@ -10,4 +10,8 @@ object FileUtils {
     fileName.createNewFile()
   }
 
+  def deleteFile(fileName: File): Unit ={
+    fileName.delete()
+  }
+
 }

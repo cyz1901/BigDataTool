@@ -7,11 +7,12 @@ import org.slf4j.LoggerFactory
 import pers.cyz.bigdatatool.common.config.{AppConfig, SystemConfig}
 import pers.cyz.bigdatatool.common.utils.UrlUtils
 import pers.cyz.bigdatatool.core.download.DownloadExecutor
-import pers.cyz.bigdatatool.node.grpc.com.{DeployRequest, DeployResponse, DownloadComponentRequest, DownloadComponentResponse, ServeGrpc}
+import pers.cyz.bigdatatool.node.grpc.com.{DeployRequest, DeployResponse, DistributeComponentRequest, DistributeComponentResponse, DownloadComponentRequest, DownloadComponentResponse, ServeGrpc}
 
-import java.io.{BufferedWriter, File, FileOutputStream, FileWriter, ObjectOutputStream}
+import java.io.{BufferedWriter, File, FileInputStream, FileOutputStream, FileWriter, ObjectOutputStream, RandomAccessFile}
 import java.lang.Thread.sleep
 import java.net.URL
+import java.nio.channels.Channels
 import sys.process._
 import scala.collection.mutable.ArrayBuffer
 
@@ -53,8 +54,54 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
     }
   }
 
-  /**
-   */
+
+  override def distributeComponent(responseObserver: StreamObserver[DistributeComponentResponse]): StreamObserver[DistributeComponentRequest] = {
+    super.distributeComponent(responseObserver)
+    new StreamObserver[DistributeComponentRequest] {
+      override def onNext(v: DistributeComponentRequest): Unit = {
+        v.getMsg match {
+          case "start" =>
+            val file: File = new File(SystemConfig.userHomePath + "/BDMData/" + v.getFileName)
+            val buf = v.getData.asReadOnlyByteBuffer()
+            val readableByteChannel = Channels.newChannel(new FileInputStream(file))
+            val threadAccessFile = new RandomAccessFile(file, "rwd")
+            val fileChannel = threadAccessFile.getChannel
+            while (readableByteChannel.read(buf) != -1) {
+              fileChannel.write(buf)
+              buf.clear()
+            }
+            threadAccessFile.close()
+            readableByteChannel.close()
+//            v.getComponentMapMap.forEach((key, value) => {
+//              arrayUrl.addOne(UrlUtils.getUrl(key, value))
+//            })
+//            val downloader = new DownloadExecutor()
+//            downloader.downloadExecute(arrayUrl.toArray)
+//            val downloadThread = new Thread() {
+//              override def run(): Unit = {
+//                while (DownloadExecutor.downloadSize.get() < downloader.totalSize) {
+//                  sleep(1000)
+//                  responseObserver.onNext(DownloadComponentResponse.newBuilder()
+//                    .setAlreadyDownloadSize(DownloadExecutor.downloadSize.get())
+//                    .setTotalSize(downloader.totalSize).build())
+//                }
+//              }
+//            }
+//            downloadThread.run()
+        }
+      }
+
+      override def onError(throwable: Throwable): Unit = {
+        logger.error(throwable.toString)
+      }
+
+      override def onCompleted(): Unit = {
+        logger.info("Completed")
+      }
+    }
+  }
+
+
   override def deploy(request: DeployRequest, responseObserver: StreamObserver[DeployResponse]): Unit = {
     import java.io.FileWriter
 

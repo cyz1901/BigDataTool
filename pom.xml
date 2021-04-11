@@ -140,6 +140,12 @@
             <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>net.alchim31.maven</groupId>
+            <artifactId>scala-maven-plugin</artifactId>
+            <version>4.4.1</version>
+            <type>maven-plugin</type>
+        </dependency>
 
         <dependency>
             <groupId>org.scala-lang</groupId>
