@@ -1,15 +1,16 @@
 package pers.cyz.bigdatatool.core.master
 
+import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
 import pers.cyz.bigdatatool.common.config.SystemConfig
 import pers.cyz.bigdatatool.node.grpc.com.{DeployRequest, DeployResponse, DistributeComponentRequest, DistributeComponentResponse, DownloadComponentRequest, DownloadComponentResponse, ServeGrpc}
 import pers.cyz.bigdatatool.uiservice.bean.Clusters
-import pers.cyz.bigdatatool.uiservice.controller.{DeployController, DownloadController}
+import pers.cyz.bigdatatool.uiservice.controller.DownloadController
 import pers.cyz.bigdatatool.uiservice.controller.DeployController
 
-import java.io.{File, FileOutputStream, ObjectOutputStream}
+import java.io.{File, FileInputStream, FileOutputStream, ObjectOutputStream}
 
 
 class MasterClient(
@@ -52,7 +53,8 @@ class MasterClient(
   }
 
   // TODO 分发
-  def invokeDistribute(map: java.util.Map[String, String]): Unit = {
+  def invokeDistribute(fileName: String): Unit = {
+    val distributeSize: Long = 0
     val grpcResponse: StreamObserver[DistributeComponentResponse] = new StreamObserver[DistributeComponentResponse] {
       override def onNext(v: DistributeComponentResponse): Unit = {
 
@@ -68,8 +70,13 @@ class MasterClient(
     }
 
     val grpcRequest: StreamObserver[DistributeComponentRequest] = asyncStub.distributeComponent(grpcResponse)
-
-    grpcRequest.onNext(DistributeComponentRequest.newBuilder().setFileName("haha").setMsg("start").build())
+    val file = new File(s"${SystemConfig.userHomePath}/BDMData/cache/$fileName")
+    val is = new FileInputStream(file)
+    val buf:Array[Byte] = new Array[Byte](1024)
+    while (is.read(buf) != -1) {
+      grpcRequest.onNext(DistributeComponentRequest.newBuilder().setFileName(fileName).setMsg("start").setData(ByteString.copyFrom(buf)).build())
+    }
+    is.close()
   }
 
 

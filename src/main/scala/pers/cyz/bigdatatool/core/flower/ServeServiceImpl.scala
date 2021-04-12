@@ -12,6 +12,7 @@ import pers.cyz.bigdatatool.node.grpc.com.{DeployRequest, DeployResponse, Distri
 import java.io.{BufferedWriter, File, FileInputStream, FileOutputStream, FileWriter, ObjectOutputStream, RandomAccessFile}
 import java.lang.Thread.sleep
 import java.net.URL
+import java.nio.ByteBuffer
 import java.nio.channels.Channels
 import sys.process._
 import scala.collection.mutable.ArrayBuffer
@@ -56,46 +57,54 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
 
 
   override def distributeComponent(responseObserver: StreamObserver[DistributeComponentResponse]): StreamObserver[DistributeComponentRequest] = {
-    super.distributeComponent(responseObserver)
     new StreamObserver[DistributeComponentRequest] {
+      val buf = ByteBuffer.allocate(1024)
+
+      import java.io.FileOutputStream
+
+      val file: File = new File(SystemConfig.userHomePath + "/BDMData/test.zip")
+      val os = new FileOutputStream(file)
+
       override def onNext(v: DistributeComponentRequest): Unit = {
         v.getMsg match {
           case "start" =>
-            val file: File = new File(SystemConfig.userHomePath + "/BDMData/" + v.getFileName)
-            val buf = v.getData.asReadOnlyByteBuffer()
-            val readableByteChannel = Channels.newChannel(new FileInputStream(file))
-            val threadAccessFile = new RandomAccessFile(file, "rwd")
-            val fileChannel = threadAccessFile.getChannel
-            while (readableByteChannel.read(buf) != -1) {
-              fileChannel.write(buf)
-              buf.clear()
-            }
-            threadAccessFile.close()
-            readableByteChannel.close()
-//            v.getComponentMapMap.forEach((key, value) => {
-//              arrayUrl.addOne(UrlUtils.getUrl(key, value))
-//            })
-//            val downloader = new DownloadExecutor()
-//            downloader.downloadExecute(arrayUrl.toArray)
-//            val downloadThread = new Thread() {
-//              override def run(): Unit = {
-//                while (DownloadExecutor.downloadSize.get() < downloader.totalSize) {
-//                  sleep(1000)
-//                  responseObserver.onNext(DownloadComponentResponse.newBuilder()
-//                    .setAlreadyDownloadSize(DownloadExecutor.downloadSize.get())
-//                    .setTotalSize(downloader.totalSize).build())
-//                }
-//              }
-//            }
-//            downloadThread.run()
+            v.getData.writeTo(os)
+          //            val buf = v.getData.asReadOnlyByteBuffer()
+          //            val readableByteChannel = Channels.newChannel(new FileInputStream(file))
+          //            val threadAccessFile = new RandomAccessFile(file, "rwd")
+          //            val fileChannel = threadAccessFile.getChannel
+          //            while (readableByteChannel.read(buf) != -1) {
+          //              fileChannel.write(buf)
+          //              buf.clear()
+          //            }
+          //            threadAccessFile.close()
+          //            readableByteChannel.close()
+          //            v.getComponentMapMap.forEach((key, value) => {
+          //              arrayUrl.addOne(UrlUtils.getUrl(key, value))
+          //            })
+          //            val downloader = new DownloadExecutor()
+          //            downloader.downloadExecute(arrayUrl.toArray)
+          //            val downloadThread = new Thread() {
+          //              override def run(): Unit = {
+          //                while (DownloadExecutor.downloadSize.get() < downloader.totalSize) {
+          //                  sleep(1000)
+          //                  responseObserver.onNext(DownloadComponentResponse.newBuilder()
+          //                    .setAlreadyDownloadSize(DownloadExecutor.downloadSize.get())
+          //                    .setTotalSize(downloader.totalSize).build())
+          //                }
+          //              }
+          //            }
+          //            downloadThread.run()
         }
       }
 
       override def onError(throwable: Throwable): Unit = {
+        os.close()
         logger.error(throwable.toString)
       }
 
       override def onCompleted(): Unit = {
+        os.close()
         logger.info("Completed")
       }
     }
@@ -195,7 +204,7 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
       //        s"${System.getProperty("java.home")}"));
 
       // TODO 改为master
-      if (SystemConfig.localHostName == "Computer"){
+      if (SystemConfig.localHostName == "Computer") {
         // 初始化namenode
         val process_1 = s"${SystemConfig.userHomePath}/BDMData/${key}-${value}/bin/hdfs namenode -format".!!
         println(process_1)

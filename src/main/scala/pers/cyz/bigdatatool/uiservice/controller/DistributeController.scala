@@ -4,11 +4,13 @@ import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import pers.cyz.bigdatatool.common.config.SystemConfig
 import pers.cyz.bigdatatool.core.master.MasterNode
 import pers.cyz.bigdatatool.uiservice.bean.ComponentDownloadData
 import pers.cyz.bigdatatool.uiservice.bean.vo.DownloadVo
 import pers.cyz.bigdatatool.uiservice.bean.vo.DownloadVo.ListData
 
+import java.io.File
 import java.lang.Thread.sleep
 import java.util
 import java.util.concurrent.ConcurrentHashMap
@@ -40,39 +42,33 @@ class DistributeController {
       message,
       new TypeReference[util.ArrayList[ComponentDownloadData]]() {})
 
-    val map: java.util.Map[String, String] = new util.HashMap[String, String]()
-    requestMsg.forEach(x => {
-      map.put(x.getName, x.getVersion)
-    })
 
     var threadNum = 0
     MasterNode.masterClientArray.foreach(client => {
-      DownloadController.totalComponents += map.size()
-      threadNum += 1
       val thr = new Thread() {
         override def run(): Unit = {
-          client.invokeDistribute(map)
+          client.invokeDistribute(fileName = "test")
         }
       }
       thr.setName(client.getClass.toString)
       thr.start()
     })
 
-    breakable {
-      while (true) {
-        sleep(1000)
-        if (DownloadController.totalSize * threadNum <= DownloadController.alreadyDownloadSize && DownloadController.totalSize != 0) {
-          DownloadController.updateData()
-          logger.info(s"Main allsize is ${DownloadController.totalSize} already is ${DownloadController.alreadyDownloadSize}")
-          DownloadController.clear()
-          break
-        }
-        logger.info(s"Main allsize is ${DownloadController.totalSize} already is ${DownloadController.alreadyDownloadSize}")
-        DownloadController.updateData()
-        sendMessage(DownloadController.totalSize,
-          DownloadController.alreadyDownloadSize, DownloadController.totalComponents, 2, "run")
-      }
-    }
+//    breakable {
+//      while (true) {
+//        sleep(1000)
+//        if (DownloadController.totalSize * threadNum <= DownloadController.alreadyDownloadSize && DownloadController.totalSize != 0) {
+//          DownloadController.updateData()
+//          logger.info(s"Main allsize is ${DownloadController.totalSize} already is ${DownloadController.alreadyDownloadSize}")
+//          DownloadController.clear()
+//          break
+//        }
+//        logger.info(s"Main allsize is ${DownloadController.totalSize} already is ${DownloadController.alreadyDownloadSize}")
+//        DownloadController.updateData()
+//        sendMessage(DownloadController.totalSize,
+//          DownloadController.alreadyDownloadSize, DownloadController.totalComponents, 2, "run")
+//      }
+//    }
   }
 
 
@@ -107,27 +103,27 @@ class DistributeController {
 
 }
 
-object DistributeController {
-  var totalSize: Long = 0
-  var alreadyDownloadSize: Long = 0
-  var totalComponents = 0
-  var ha = new ConcurrentHashMap[Long, Long]()
-
-  def downloadControllerCallback(threadId: Long, alreadyDownloadSize: Long): Unit = {
-    ha.put(threadId, alreadyDownloadSize)
-  }
-
-  def updateData(): Unit = {
-    alreadyDownloadSize = 0
-    ha.forEach((key, value) => {
-      alreadyDownloadSize += value
-    })
-  }
-
-  def clear(): Unit = {
-    this.totalSize = 0
-    this.alreadyDownloadSize = 0
-    this.totalComponents = 0
-    this.ha.clear()
-  }
-}
+//object DistributeController {
+//  var totalSize: Long = 0
+//  var alreadyDownloadSize: Long = 0
+//  var totalComponents = 0
+//  var ha = new ConcurrentHashMap[Long, Long]()
+//
+//  def downloadControllerCallback(threadId: Long, alreadyDownloadSize: Long): Unit = {
+//    ha.put(threadId, alreadyDownloadSize)
+//  }
+//
+//  def updateData(): Unit = {
+//    alreadyDownloadSize = 0
+//    ha.forEach((key, value) => {
+//      alreadyDownloadSize += value
+//    })
+//  }
+//
+//  def clear(): Unit = {
+//    this.totalSize = 0
+//    this.alreadyDownloadSize = 0
+//    this.totalComponents = 0
+//    this.ha.clear()
+//  }
+//}

@@ -10,9 +10,9 @@ import java.io.File
 @Service
 class ColonyService {
   def uploadFile(fileUpload: Array[MultipartFile]) = {
-    val filePath = new File(s"${SystemConfig.userHomePath}/BDMData/cache/","ll")
-    FileUtils.createFile(filePath)
-    fileUpload(0).transferTo(filePath)
+//    val filePath = new File(s"${SystemConfig.userHomePath}/BDMData/cache/","test")
+//    FileUtils.createFile(filePath)
+//    fileUpload(0).transferTo(filePath)
   }
 
 }
