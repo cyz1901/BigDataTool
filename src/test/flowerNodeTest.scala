@@ -4,6 +4,9 @@ import pers.cyz.bigdatatool.common.utils.loader.LoaderType.Yaml
 import pers.cyz.bigdatatool.core.flower.FlowerNode
 
 object flowerNodeTest {
+  def hello (): Unit ={
+
+  }
   def main(args: Array[String]): Unit = {
     // 获取配置
     new Loader[AppConfig.type]().Builder

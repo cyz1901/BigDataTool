@@ -120,7 +120,6 @@ object DeployController {
   private val lock = new ReentrantLock()
 
   def setMessage(message: String, status: String, step: String): Unit = {
-
     try {
       lock.lock()
       this.message = message

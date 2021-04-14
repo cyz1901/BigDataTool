@@ -58,17 +58,24 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
 
   override def distributeComponent(responseObserver: StreamObserver[DistributeComponentResponse]): StreamObserver[DistributeComponentRequest] = {
     new StreamObserver[DistributeComponentRequest] {
-      val buf = ByteBuffer.allocate(1024)
 
       import java.io.FileOutputStream
 
       val file: File = new File(SystemConfig.userHomePath + "/BDMData/test.zip")
       val os = new FileOutputStream(file)
+      val buf = ByteBuffer.allocate(1024)
+      var size: Long = 0
 
       override def onNext(v: DistributeComponentRequest): Unit = {
         v.getMsg match {
           case "start" =>
+            v.getData.copyTo(buf)
+            size += buf.position()
             v.getData.writeTo(os)
+            buf.clear()
+            responseObserver.onNext(DistributeComponentResponse.newBuilder()
+                              .setAlreadyDistribute(size).setMsg("run").build())
+
           //            val buf = v.getData.asReadOnlyByteBuffer()
           //            val readableByteChannel = Channels.newChannel(new FileInputStream(file))
           //            val threadAccessFile = new RandomAccessFile(file, "rwd")
@@ -99,12 +106,17 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
       }
 
       override def onError(throwable: Throwable): Unit = {
+        responseObserver.onNext(DistributeComponentResponse.newBuilder()
+          .setMsg("error").build())
         os.close()
         logger.error(throwable.toString)
       }
 
       override def onCompleted(): Unit = {
-        os.close()
+//        responseObserver.onNext(DistributeComponentResponse.newBuilder()
+//          .setMsg("finish").build())
+//        os.close()
+        responseObserver.onCompleted()
         logger.info("Completed")
       }
     }

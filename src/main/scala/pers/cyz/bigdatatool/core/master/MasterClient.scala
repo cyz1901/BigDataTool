@@ -1,16 +1,17 @@
 package pers.cyz.bigdatatool.core.master
 
 import com.google.protobuf.ByteString
+import edu.emory.mathcs.backport.java.util.concurrent.atomic.AtomicInteger
 import io.grpc.ManagedChannel
 import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
 import pers.cyz.bigdatatool.common.config.SystemConfig
 import pers.cyz.bigdatatool.node.grpc.com.{DeployRequest, DeployResponse, DistributeComponentRequest, DistributeComponentResponse, DownloadComponentRequest, DownloadComponentResponse, ServeGrpc}
 import pers.cyz.bigdatatool.uiservice.bean.Clusters
-import pers.cyz.bigdatatool.uiservice.controller.DownloadController
-import pers.cyz.bigdatatool.uiservice.controller.DeployController
+import pers.cyz.bigdatatool.uiservice.controller.{DeployController, DistributeController, DownloadController}
 
 import java.io.{File, FileInputStream, FileOutputStream, ObjectOutputStream}
+import java.util.concurrent.atomic.AtomicLong
 
 
 class MasterClient(
@@ -52,12 +53,37 @@ class MasterClient(
     grpcRequest.onNext(DownloadComponentRequest.newBuilder().putAllComponentMap(map).setCommandType("start").build())
   }
 
-  // TODO 分发
-  def invokeDistribute(fileName: String): Unit = {
-    val distributeSize: Long = 0
+  /*
+  * 每个线程都会维护一个signal 通过判断signal来看是否要把最新的下载量写入全局变量
+  *
+  * */
+  def invokeDistribute(fileName: String, file: File, count: AtomicLong): Unit = {
+
     val grpcResponse: StreamObserver[DistributeComponentResponse] = new StreamObserver[DistributeComponentResponse] {
+
+      //      if (taskAccumulationSignal.get()) {
+      //        DistributeController.threadBarrier.getAndIncrement()
+      //      }
+
       override def onNext(v: DistributeComponentResponse): Unit = {
 
+        // 记忆未阻塞处理器获得的最新数据
+        count.set(v.getAlreadyDistribute)
+//        println(v.getAlreadyDistribute)
+        //
+        //        // 判断更新数据
+        //        if (taskAccumulationSignal) {
+        //          logger.info(s"${Thread.currentThread().getName} Update tAS ${taskAccumulationSignal} - tB ${DistributeController.threadBarrier}")
+        //          taskAccumulationSignal = false
+        //          DistributeController.threadBarrier.getAndIncrement()
+        //          DistributeController.updateData(count, v.getMsg)
+        //        }
+        //
+        //        // 判断更新signal
+        //        if (DistributeController.threadBarrier.get() < (DistributeController.threadNum + Thread.activeCount() )) {
+        //          logger.info(s"${Thread.currentThread().getName} UpdateLock tAS ${taskAccumulationSignal} - tB ${DistributeController.threadBarrier}")
+        //          taskAccumulationSignal = true
+        //        }
       }
 
       override def onError(throwable: Throwable): Unit = {
@@ -65,18 +91,20 @@ class MasterClient(
       }
 
       override def onCompleted(): Unit = {
+        DistributeController.nowComponents += 1
         logger.info("Completed")
       }
     }
 
     val grpcRequest: StreamObserver[DistributeComponentRequest] = asyncStub.distributeComponent(grpcResponse)
-    val file = new File(s"${SystemConfig.userHomePath}/BDMData/cache/$fileName")
     val is = new FileInputStream(file)
-    val buf:Array[Byte] = new Array[Byte](1024)
+    val buf: Array[Byte] = new Array[Byte](1024)
     while (is.read(buf) != -1) {
       grpcRequest.onNext(DistributeComponentRequest.newBuilder().setFileName(fileName).setMsg("start").setData(ByteString.copyFrom(buf)).build())
     }
+
     is.close()
+    grpcRequest.onCompleted()
   }
 
 
