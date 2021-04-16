@@ -1,7 +1,7 @@
 serve:
   masterName: Computer
-  nodeCount: 1
+  nodeCount: 2
   metaAddress: Meta
 repository:
   url: https://mirrors.tuna.tsinghua.edu.cn
-  downloadFile: metadata/
+  downloadFile: BDMData

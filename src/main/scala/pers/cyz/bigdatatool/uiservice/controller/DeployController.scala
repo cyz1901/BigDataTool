@@ -4,17 +4,20 @@ import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import pers.cyz.bigdatatool.core.master.MasterNode
+import pers.cyz.bigdatatool.core.master.{MasterClient, MasterNode}
 import pers.cyz.bigdatatool.uiservice.bean.DeployData
 import pers.cyz.bigdatatool.uiservice.bean.vo.DeployVo
 
+import java.io.File
 import java.lang.Thread.sleep
 import java.util
 import java.util.EventObject
+import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.locks.ReentrantLock
 import javax.websocket.{OnClose, OnError, OnMessage, OnOpen, Session}
 import javax.websocket.server.ServerEndpoint
 import scala.util.control.Breaks.{break, breakable}
+import scala.jdk.CollectionConverters._
 
 @ServerEndpoint("/websocket/deploy")
 @Component
@@ -22,7 +25,6 @@ class DeployController {
   private val logger = LoggerFactory.getLogger(classOf[DeployController])
   private var session: Session = _
   val om: ObjectMapper = new ObjectMapper()
-  DeployController.de = this
 
   class OnMessageListener extends EventObject {
 
@@ -49,7 +51,14 @@ class DeployController {
     val requestMsg: DeployData = om.readValue(
       message,
       classOf[DeployData])
-    //    println(requestMsg.getNodeData)
+
+    val threadNum = MasterNode.masterClientArray.length
+    val cyclicBarrier: CyclicBarrier = new CyclicBarrier(threadNum, new Thread(() => {
+      sendMessage(DeployController.message,
+        DeployController.status,
+        DeployController.step)
+    }))
+
     val nodeMap: util.Map[String, String] = new util.HashMap[String, String]()
     requestMsg.getNodeData.forEach(x => {
       nodeMap.put(x.getHostname, x.getNodeType)
@@ -59,21 +68,14 @@ class DeployController {
     requestMsg.getComponentData.forEach(x => {
       componentMap.put(x.getName, x.getVersion)
     })
+
     logger.info(nodeMap.size().toString)
     logger.info(componentMap.size().toString)
 
     MasterNode.masterClientArray.foreach(client => {
-      val thr = new Thread() {
-        override def run(): Unit = {
-          client.invokeDeploy(nodeMap, componentMap, requestMsg.getDeployType, requestMsg.getColonyName)
-        }
-      }
-      thr.setName(client.getClass.toString)
-      thr.start()
+      val work = new DeployThread(cyclicBarrier, client, nodeMap, componentMap, requestMsg.getDeployType, requestMsg.getColonyName)
+      work.start()
     })
-
-    //    DeployController.waiting(this)
-
 
   }
 
@@ -107,6 +109,17 @@ class DeployController {
     msg.setTitle(step)
     this.session.getBasicRemote.sendText(om.writeValueAsString(msg))
   }
+
+  class DeployThread(cyclicBarrier: CyclicBarrier,
+                     client: MasterClient,
+                     nodeMap: util.Map[String, String],
+                     componentMap: util.Map[String, String],
+                     DeployType: String,
+                     ColonyName: String) extends Thread {
+    override def run(): Unit = {
+      client.invokeDeploy(cyclicBarrier, nodeMap, componentMap, DeployType, ColonyName)
+    }
+  }
 }
 
 // 没有实现分布式信息传送的竞争
@@ -115,7 +128,6 @@ object DeployController {
   var message: String = _
   var status: String = _
   var step: String = _
-  var de: DeployController = _
 
   private val lock = new ReentrantLock()
 
@@ -125,7 +137,6 @@ object DeployController {
       this.message = message
       this.status = status
       this.step = step
-      de.sendMessage(message, status, step)
     } catch {
       case e: Throwable => logger.error(e.toString)
     } finally {

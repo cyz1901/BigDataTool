@@ -13,7 +13,7 @@ import java.io.{BufferedWriter, File, FileInputStream, FileOutputStream, FileWri
 import java.lang.Thread.sleep
 import java.net.URL
 import java.nio.ByteBuffer
-import java.nio.channels.Channels
+import java.nio.channels.{Channels, FileChannel}
 import sys.process._
 import scala.collection.mutable.ArrayBuffer
 
@@ -61,47 +61,25 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
 
       import java.io.FileOutputStream
 
-      val file: File = new File(SystemConfig.userHomePath + "/BDMData/test.zip")
-      val os = new FileOutputStream(file)
-      val buf = ByteBuffer.allocate(1024)
+      var file: File = _
+      var os: FileOutputStream = _
+      val buf: ByteBuffer = ByteBuffer.allocate(1024)
       var size: Long = 0
 
       override def onNext(v: DistributeComponentRequest): Unit = {
         v.getMsg match {
-          case "start" =>
+          case "start" => {
+            logger.info(s"hello")
+            file = new File(SystemConfig.userHomePath + "/BDMData/" + v.getFileName)
+            os = new FileOutputStream(file)
+          }
+          case "run" =>
             v.getData.copyTo(buf)
             size += buf.position()
             v.getData.writeTo(os)
             buf.clear()
             responseObserver.onNext(DistributeComponentResponse.newBuilder()
-                              .setAlreadyDistribute(size).setMsg("run").build())
-
-          //            val buf = v.getData.asReadOnlyByteBuffer()
-          //            val readableByteChannel = Channels.newChannel(new FileInputStream(file))
-          //            val threadAccessFile = new RandomAccessFile(file, "rwd")
-          //            val fileChannel = threadAccessFile.getChannel
-          //            while (readableByteChannel.read(buf) != -1) {
-          //              fileChannel.write(buf)
-          //              buf.clear()
-          //            }
-          //            threadAccessFile.close()
-          //            readableByteChannel.close()
-          //            v.getComponentMapMap.forEach((key, value) => {
-          //              arrayUrl.addOne(UrlUtils.getUrl(key, value))
-          //            })
-          //            val downloader = new DownloadExecutor()
-          //            downloader.downloadExecute(arrayUrl.toArray)
-          //            val downloadThread = new Thread() {
-          //              override def run(): Unit = {
-          //                while (DownloadExecutor.downloadSize.get() < downloader.totalSize) {
-          //                  sleep(1000)
-          //                  responseObserver.onNext(DownloadComponentResponse.newBuilder()
-          //                    .setAlreadyDownloadSize(DownloadExecutor.downloadSize.get())
-          //                    .setTotalSize(downloader.totalSize).build())
-          //                }
-          //              }
-          //            }
-          //            downloadThread.run()
+              .setAlreadyDistribute(size).setMsg("run").build())
         }
       }
 
@@ -113,9 +91,9 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
       }
 
       override def onCompleted(): Unit = {
-//        responseObserver.onNext(DistributeComponentResponse.newBuilder()
-//          .setMsg("finish").build())
-//        os.close()
+        responseObserver.onNext(DistributeComponentResponse.newBuilder()
+          .setMsg("finish").build())
+        os.close()
         responseObserver.onCompleted()
         logger.info("Completed")
       }
@@ -159,7 +137,7 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
     request.getComponentMapMap.forEach((key, value) => {
       //解压
       responseObserver.onNext(DeployResponse.newBuilder().setStep("extract").setStatus("working").setMessage("正在解压完毕").build())
-      val process = Seq("tar", "xvf", s"${SystemConfig.userHomePath}/BDMData/${key}-${value}.tar.gz", "-C", "/home/cyz/BDMData/").!!
+      val process = Seq("tar", "xvf", s"${SystemConfig.userHomePath}/BDMData/${key}-${value}.tar.gz", "-C", s"${SystemConfig.userHomePath}/BDMData/").!!
       responseObserver.onNext(DeployResponse.newBuilder().setStep("extract").setStatus("finish").setMessage("已经解压完毕").build())
 
       //设置格式

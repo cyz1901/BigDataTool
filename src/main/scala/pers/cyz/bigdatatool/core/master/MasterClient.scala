@@ -11,7 +11,10 @@ import pers.cyz.bigdatatool.uiservice.bean.Clusters
 import pers.cyz.bigdatatool.uiservice.controller.{DeployController, DistributeController, DownloadController}
 
 import java.io.{File, FileInputStream, FileOutputStream, ObjectOutputStream}
+import java.nio.ByteBuffer
+import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.atomic.AtomicLong
+import scala.jdk.CollectionConverters._
 
 
 class MasterClient(
@@ -23,14 +26,8 @@ class MasterClient(
   //  val layer = new LayerDownloadService()
 
   def invokeDownload(map: java.util.Map[String, String]): Unit = {
-    //    var totalSize = new InheritableThreadLocal[Long]
     val grpcResponse: StreamObserver[DownloadComponentResponse] = new StreamObserver[DownloadComponentResponse] {
       override def onNext(v: DownloadComponentResponse): Unit = {
-        //        logger.info("Now totalSIze: " + v.getTotalSize + " nowSize is: " + v.getAlreadyDownloadSize)
-        //        layer.set(v.getTotalSize, v.getAlreadyDownloadSize)
-        //        send(v.getTotalSize, v.getAlreadyDownloadSize, _, _, "run")
-        //        localDownloadSize.set(v.getAlreadyDownloadSize)
-        //        DownloadController.downloadControllerCallback(localDownloadSize.get())
         DownloadController.totalSize = v.getTotalSize
         DownloadController.downloadControllerCallback(Thread.currentThread().getId, v.getAlreadyDownloadSize)
         if (v.getTotalSize <= v.getAlreadyDownloadSize) {
@@ -57,33 +54,22 @@ class MasterClient(
   * 每个线程都会维护一个signal 通过判断signal来看是否要把最新的下载量写入全局变量
   *
   * */
-  def invokeDistribute(fileName: String, file: File, count: AtomicLong): Unit = {
+  def invokeDistribute(cyclicBarrier: CyclicBarrier, fileName: String, file: File): Unit = {
 
     val grpcResponse: StreamObserver[DistributeComponentResponse] = new StreamObserver[DistributeComponentResponse] {
 
-      //      if (taskAccumulationSignal.get()) {
-      //        DistributeController.threadBarrier.getAndIncrement()
-      //      }
-
       override def onNext(v: DistributeComponentResponse): Unit = {
+        v.getMsg match {
+          case "run" => {
 
-        // 记忆未阻塞处理器获得的最新数据
-        count.set(v.getAlreadyDistribute)
-//        println(v.getAlreadyDistribute)
-        //
-        //        // 判断更新数据
-        //        if (taskAccumulationSignal) {
-        //          logger.info(s"${Thread.currentThread().getName} Update tAS ${taskAccumulationSignal} - tB ${DistributeController.threadBarrier}")
-        //          taskAccumulationSignal = false
-        //          DistributeController.threadBarrier.getAndIncrement()
-        //          DistributeController.updateData(count, v.getMsg)
-        //        }
-        //
-        //        // 判断更新signal
-        //        if (DistributeController.threadBarrier.get() < (DistributeController.threadNum + Thread.activeCount() )) {
-        //          logger.info(s"${Thread.currentThread().getName} UpdateLock tAS ${taskAccumulationSignal} - tB ${DistributeController.threadBarrier}")
-        //          taskAccumulationSignal = true
-        //        }
+            // 记忆未阻塞处理器获得的最新数据
+            DistributeController.alreadyDownloadSize.getAndAdd(v.getAlreadyDistribute)
+            cyclicBarrier.await()
+          }
+          case "finish" => {
+
+          }
+        }
       }
 
       override def onError(throwable: Throwable): Unit = {
@@ -97,10 +83,16 @@ class MasterClient(
     }
 
     val grpcRequest: StreamObserver[DistributeComponentRequest] = asyncStub.distributeComponent(grpcResponse)
+    grpcRequest.onNext(DistributeComponentRequest.newBuilder().setFileName(fileName).setMsg("start").setFileName(fileName).build())
     val is = new FileInputStream(file)
     val buf: Array[Byte] = new Array[Byte](1024)
-    while (is.read(buf) != -1) {
-      grpcRequest.onNext(DistributeComponentRequest.newBuilder().setFileName(fileName).setMsg("start").setData(ByteString.copyFrom(buf)).build())
+    var len = 0
+    // 必须存在len来保证不会多写入多余比特 会造成文件校验错误
+    while ( {
+      len = is.read(buf)
+      len
+    } != -1) {
+      grpcRequest.onNext(DistributeComponentRequest.newBuilder().setFileName(fileName).setMsg("run").setData(ByteString.copyFrom(buf, 0, len)).build())
     }
 
     is.close()
@@ -108,7 +100,8 @@ class MasterClient(
   }
 
 
-  def invokeDeploy(nodeMap: java.util.Map[String, String],
+  def invokeDeploy(cyclicBarrier: CyclicBarrier,
+                   nodeMap: java.util.Map[String, String],
                    componentMap: java.util.Map[String, String],
                    deployType: String,
                    colonyName: String
@@ -116,7 +109,20 @@ class MasterClient(
 
     val grpcResponse: StreamObserver[DeployResponse] = new StreamObserver[DeployResponse] {
       override def onNext(v: DeployResponse): Unit = {
-        DeployController.setMessage(v.getMessage, v.getStatus, v.getStep)
+        v.getStatus match {
+          case "working" => {
+            DeployController.setMessage(v.getMessage, v.getStatus, v.getStep)
+            cyclicBarrier.await()
+          }
+          case "finish" => {
+            DeployController.setMessage(v.getMessage, v.getStatus, v.getStep)
+            cyclicBarrier.await()
+          }
+          case "error" => {
+
+          }
+
+        }
       }
 
       override def onError(throwable: Throwable): Unit = {

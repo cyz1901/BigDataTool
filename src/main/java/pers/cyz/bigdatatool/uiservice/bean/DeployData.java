@@ -5,17 +5,27 @@ import java.util.ArrayList;
 public class DeployData {
     String colonyName;
     String deployType;
+    String deployWay;
     ArrayList<NodeData> nodeData;
     ArrayList<ComponentDownloadData> componentData;
 
     public DeployData() {
     }
 
-    public DeployData(String colonyName, String deployType, ArrayList<NodeData> nodeData, ArrayList<ComponentDownloadData> componentData) {
+    public DeployData(String colonyName, String deployType, String deployWay, ArrayList<NodeData> nodeData, ArrayList<ComponentDownloadData> componentData) {
         this.colonyName = colonyName;
         this.deployType = deployType;
+        this.deployWay = deployWay;
         this.nodeData = nodeData;
         this.componentData = componentData;
+    }
+
+    public String getDeployWay() {
+        return deployWay;
+    }
+
+    public void setDeployWay(String deployWay) {
+        this.deployWay = deployWay;
     }
 
     public ArrayList<ComponentDownloadData> getComponentData() {

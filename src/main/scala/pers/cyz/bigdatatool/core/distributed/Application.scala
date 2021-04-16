@@ -1,12 +1,14 @@
 package pers.cyz.bigdatatool.core.distributed
 
 import io.grpc.Server
-import pers.cyz.bigdatatool.common.config.AppConfig
+import pers.cyz.bigdatatool.common.config.{AppConfig, SystemConfig}
+import pers.cyz.bigdatatool.common.utils.FileUtils
 import pers.cyz.bigdatatool.common.utils.loader.Loader
 import pers.cyz.bigdatatool.common.utils.loader.LoaderType.Yaml
 import pers.cyz.bigdatatool.core.flower.FlowerNode
 import pers.cyz.bigdatatool.core.master.MasterNode
 
+import java.io.File
 import java.net.InetAddress
 import java.util.logging.Logger
 
@@ -20,7 +22,13 @@ object Application {
     // 获取配置
     new Loader[AppConfig.type]().Builder
       .setLoaderType(Yaml)
+//      .setConfigFilePath("etc/node.yml").build().fileToObjMapping()
       .setConfigFilePath("src/main/resources/etc/node.yml").build().fileToObjMapping()
+
+    //检测默认文件是否存在
+    val path = new File(s"${SystemConfig.userHomePath}/${AppConfig.repository.downloadFile}/")
+    path.mkdirs()
+
 
 
     // 判断节点
