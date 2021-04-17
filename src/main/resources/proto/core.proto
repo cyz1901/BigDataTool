@@ -55,8 +55,10 @@ message DistributeComponentResponse {
 message DeployRequest {
   string msg = 1;
   string type = 2;
-  map<string, string> componentMap = 3;
-  map<string, string> nodeMap = 4;
+  string nameNode = 3;
+  string secondaryNameNode = 4;
+  map<string, string> componentMap = 5;
+  map<string, string> nodeMap = 6;
 }
 
 message DeployResponse {

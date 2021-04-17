@@ -10,7 +10,7 @@
 # **BigDataTool**
 
 
-BigDataTool 是一个开源的分布式大数据管理工具，目前还是早期版本，只支持Hadoop的部署。
+BigDataTool 是一个开源的分布式大数据管理工具，目前还是早期版本，只支持Hadoop(3.3.0)的部署。
 
 
 
@@ -32,6 +32,26 @@ BigDataTool主要由基于Vue.js的UI和基于gpc和SpringBoot的后端分布式
 
 
 ## Issue
+
+使用前：
+
+所有集群应配置好统一的linux用户名并配置好java环境和网络环境
+
+
+
+所有集群应该设置好ssh
+
+nameNode节点应把ssh公钥发送到所有集群机中，例：
+
+```shell
+ssh-keygen -t rsa
+ssh-copy-id hadoop@node1
+ssh-copy-id hadoop@node2
+ssh-copy-id hadoop@node3
+...
+```
+
+
 
 打包Jar包时
 

@@ -6,18 +6,38 @@ public class DeployData {
     String colonyName;
     String deployType;
     String deployWay;
+    String nameNode;
+    String secondaryNameNode;
     ArrayList<NodeData> nodeData;
     ArrayList<ComponentDownloadData> componentData;
 
     public DeployData() {
     }
 
-    public DeployData(String colonyName, String deployType, String deployWay, ArrayList<NodeData> nodeData, ArrayList<ComponentDownloadData> componentData) {
+    public DeployData(String colonyName, String deployType, String deployWay, String nameNode, String secondaryNameNode, ArrayList<NodeData> nodeData, ArrayList<ComponentDownloadData> componentData) {
         this.colonyName = colonyName;
         this.deployType = deployType;
         this.deployWay = deployWay;
+        this.nameNode = nameNode;
+        this.secondaryNameNode = secondaryNameNode;
         this.nodeData = nodeData;
         this.componentData = componentData;
+    }
+
+    public String getNameNode() {
+        return nameNode;
+    }
+
+    public void setNameNode(String nameNode) {
+        this.nameNode = nameNode;
+    }
+
+    public String getSecondaryNameNode() {
+        return secondaryNameNode;
+    }
+
+    public void setSecondaryNameNode(String secondaryNameNode) {
+        this.secondaryNameNode = secondaryNameNode;
     }
 
     public String getDeployWay() {

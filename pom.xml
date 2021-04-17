@@ -168,7 +168,8 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>pers.cyz.bigdatatool.core.distributed.Main</mainClass>
+<!--                    更改-->
+                    <mainClass>pers.cyz.bigdatatool.core.distributed.FlowerMain</mainClass>
                 </configuration>
                 <executions>
                     <execution>

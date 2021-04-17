@@ -104,11 +104,14 @@ class MasterClient(
                    nodeMap: java.util.Map[String, String],
                    componentMap: java.util.Map[String, String],
                    deployType: String,
-                   colonyName: String
+                   colonyName: String,
+                   nameNode: String,
+                   secondaryNameNode: String
                   ) {
 
     val grpcResponse: StreamObserver[DeployResponse] = new StreamObserver[DeployResponse] {
       override def onNext(v: DeployResponse): Unit = {
+        logger.info(s"message is ${v.getMessage},step is ${v.getStep}, status is ${v.getStatus}")
         v.getStatus match {
           case "working" => {
             DeployController.setMessage(v.getMessage, v.getStatus, v.getStep)
@@ -135,7 +138,7 @@ class MasterClient(
     }
 
     val grpcRequest: DeployRequest = DeployRequest.newBuilder().putAllComponentMap(componentMap).putAllNodeMap(nodeMap)
-      .setMsg("start").setType(deployType).build()
+      .setMsg("start").setType(deployType).setNameNode(nameNode).setSecondaryNameNode(secondaryNameNode).build()
 
     // 序列化存储
     val clustersAddr = new File(s"${SystemConfig.userHomePath}/BDMData/Meta/cluster")

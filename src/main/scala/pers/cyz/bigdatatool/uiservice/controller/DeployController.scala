@@ -52,6 +52,16 @@ class DeployController {
       message,
       classOf[DeployData])
 
+    var deployType: String = ""
+    requestMsg.getDeployType match {
+      case "单机" => {
+        deployType = "standAlone"
+      }
+      case "分布式" => {
+        deployType = "distributed"
+      }
+    }
+
     val threadNum = MasterNode.masterClientArray.length
     val cyclicBarrier: CyclicBarrier = new CyclicBarrier(threadNum, new Thread(() => {
       sendMessage(DeployController.message,
@@ -73,7 +83,14 @@ class DeployController {
     logger.info(componentMap.size().toString)
 
     MasterNode.masterClientArray.foreach(client => {
-      val work = new DeployThread(cyclicBarrier, client, nodeMap, componentMap, requestMsg.getDeployType, requestMsg.getColonyName)
+      val work = new DeployThread(cyclicBarrier,
+        client,
+        nodeMap,
+        componentMap,
+        deployType,
+        requestMsg.getColonyName,
+        requestMsg.getNameNode,
+        requestMsg.getSecondaryNameNode)
       work.start()
     })
 
@@ -115,9 +132,17 @@ class DeployController {
                      nodeMap: util.Map[String, String],
                      componentMap: util.Map[String, String],
                      DeployType: String,
-                     ColonyName: String) extends Thread {
+                     ColonyName: String,
+                     nameNode: String,
+                     secondaryNameNode: String) extends Thread {
     override def run(): Unit = {
-      client.invokeDeploy(cyclicBarrier, nodeMap, componentMap, DeployType, ColonyName)
+      client.invokeDeploy(cyclicBarrier,
+        nodeMap,
+        componentMap,
+        DeployType,
+        ColonyName,
+        nameNode,
+        secondaryNameNode)
     }
   }
 }
