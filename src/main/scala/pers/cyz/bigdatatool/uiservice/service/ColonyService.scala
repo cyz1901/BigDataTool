@@ -32,10 +32,15 @@ class ColonyService {
     new ColonyVo(nodesMsgList, componentMsgList)
   }
 
-  def uploadFile(fileUpload: Array[MultipartFile]) = {
-    val filePath = new File(s"${SystemConfig.userHomePath}/BDMData/cache/", fileUpload(0).getOriginalFilename)
-    FileUtils.createFile(filePath)
-    fileUpload(0).transferTo(filePath)
+  def uploadFile(fileUpload: Array[MultipartFile]): String = {
+    try {
+      val filePath = new File(s"${SystemConfig.userHomePath}/BDMData/cache/", fileUpload(0).getOriginalFilename)
+      FileUtils.createFile(filePath)
+      fileUpload(0).transferTo(filePath)
+      "success"
+    } catch {
+      case exception: Exception => exception.toString
+    }
     //    // 对文件进行解压
     //    Seq("tar", "xvf", s"${SystemConfig.userHomePath}/BDMData/cache/${fileUpload(0).getOriginalFilename}", "-C", "/home/cyz/BDMData/").!!
   }

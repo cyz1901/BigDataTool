@@ -2,16 +2,19 @@ package pers.cyz.bigdatatool.uiservice.controller
 
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import edu.emory.mathcs.backport.java.util.concurrent.atomic.AtomicInteger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import pers.cyz.bigdatatool.core.master.MasterNode
+import pers.cyz.bigdatatool.core.master.{MasterClient, MasterNode}
 import pers.cyz.bigdatatool.uiservice.bean.ComponentDownloadData
 import pers.cyz.bigdatatool.uiservice.bean.vo.DownloadVo
 import pers.cyz.bigdatatool.uiservice.bean.vo.DownloadVo.ListData
 
+import java.io.File
 import java.lang.Thread.sleep
 import java.util
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.{ConcurrentHashMap, CyclicBarrier}
 import javax.websocket.{OnClose, OnError, OnMessage, OnOpen, Session}
 import javax.websocket.server.ServerEndpoint
 import scala.util.control.Breaks.{break, breakable}
@@ -37,41 +40,45 @@ class DownloadController {
 
 
   @OnMessage def onMessage(message: String, session: Session): Unit = {
+    var nowSize: Long = 0
+    var totalComponents: Int = 0
     val requestMsg: util.ArrayList[ComponentDownloadData] = om.readValue(
       message,
       new TypeReference[util.ArrayList[ComponentDownloadData]]() {})
+
+    val threadNum = MasterNode.masterClientArray.length
+    val cyclicBarrier: CyclicBarrier = new CyclicBarrier(threadNum, new Thread(() => {
+      nowSize = DownloadController.alreadyDownloadSize.get()
+      DownloadController.alreadyDownloadSize.set(0)
+    }))
 
     val map: java.util.Map[String, String] = new util.HashMap[String, String]()
     requestMsg.forEach(x => {
       map.put(x.getName, x.getVersion)
     })
 
-    var threadNum = 0
     MasterNode.masterClientArray.foreach(client => {
-      DownloadController.totalComponents += map.size()
-      threadNum += 1
-      val thr = new Thread() {
-        override def run(): Unit = {
-          client.invokeDownload(map)
-        }
-      }
-      thr.setName(client.getClass.toString)
-      thr.start()
+      totalComponents += 1
+      val work = new DownloadThread(cyclicBarrier, client, map)
+      work.start()
     })
+
+    totalComponents = threadNum
 
     breakable {
       while (true) {
         sleep(1000)
-        if (DownloadController.totalSize * threadNum <= DownloadController.alreadyDownloadSize && DownloadController.totalSize != 0) {
-          DownloadController.updateData()
-          logger.info(s"Main allsize is ${DownloadController.totalSize} already is ${DownloadController.alreadyDownloadSize}")
+        // 判断完成度
+        if (DownloadController.totalSize.get() * threadNum <= nowSize && DownloadController.totalSize.get() * threadNum != 0) {
+//          logger.info(s"Finish allSize is ${totalSize} already is ${nowSize}")
+          sendMessage(DownloadController.totalSize.get() * threadNum, nowSize, totalComponents, DownloadController.nowComponents.get(), "finish")
           DownloadController.clear()
+          // gc
+          System.gc()
           break
         }
-        logger.info(s"Main allsize is ${DownloadController.totalSize} already is ${DownloadController.alreadyDownloadSize}")
-        DownloadController.updateData()
-        sendMessage(DownloadController.totalSize,
-          DownloadController.alreadyDownloadSize, DownloadController.totalComponents, 2, "run")
+//        logger.info(s"Main allsize is ${totalSize} already is ${nowSize}")
+        sendMessage(DownloadController.totalSize.get() * threadNum, nowSize, totalComponents, DownloadController.nowComponents.get(), "run")
       }
     }
   }
@@ -105,30 +112,24 @@ class DownloadController {
     this.session.getBasicRemote.sendText(om.writeValueAsString(msg))
   }
 
+  class DownloadThread(cyclicBarrier: CyclicBarrier, client: MasterClient, map: java.util.Map[String, String]) extends Thread {
+    override def run(): Unit = {
+      client.invokeDownload(cyclicBarrier, map)
+    }
+  }
 
 }
 
 object DownloadController {
-  var totalSize: Long = 0
-  var alreadyDownloadSize: Long = 0
-  var totalComponents = 0
-  var ha = new ConcurrentHashMap[Long, Long]()
+  var totalSize = new AtomicLong(0)
+  var alreadyDownloadSize = new AtomicLong(0)
+  var nowComponents = new AtomicInteger(0)
 
-  def downloadControllerCallback(threadId: Long, alreadyDownloadSize: Long): Unit = {
-    ha.put(threadId, alreadyDownloadSize)
-  }
-
-  def updateData(): Unit = {
-    alreadyDownloadSize = 0
-    ha.forEach((key, value) => {
-      alreadyDownloadSize += value
-    })
-  }
 
   def clear(): Unit = {
-    this.totalSize = 0
-    this.alreadyDownloadSize = 0
-    this.totalComponents = 0
-    this.ha.clear()
+    this.totalSize.set(0)
+    this.alreadyDownloadSize.set(0)
+    this.nowComponents.set(0)
+
   }
 }

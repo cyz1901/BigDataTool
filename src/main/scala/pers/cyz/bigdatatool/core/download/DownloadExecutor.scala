@@ -8,7 +8,7 @@ import scala.util.{Failure, Success, Try}
 
 class DownloadExecutor {
   var totalSize: Long = 0
-  var threadNum: Int = 4
+  var threadNum: Int = 3
 
   def getDownloadTaskSize(array: Array[URL]): Unit = {
     for (url <- array) {
@@ -53,9 +53,9 @@ class DownloadExecutor {
     DownloadExecutor.downloadSpeed = 0
     getDownloadTaskSize(array)
     val ex = Executors.newFixedThreadPool(threadNum).asInstanceOf[ThreadPoolExecutor]
-    ex.execute(new DownloadControllerTask(totalSize))
+//    ex.execute(new DownloadControllerTask(totalSize))
     for (url <- array) {
-      val blockSize = getBlockSize(url, threadNum -1 )
+      val blockSize = getBlockSize(url, threadNum )
       for (i <- 1 until threadNum) {
           ex.submit(new DownloadFileTask(url, blockSize * (i - 1), blockSize * i, getFileName(url)))
       }
@@ -71,13 +71,13 @@ object DownloadExecutor {
 }
 
 
-//object ExecutorTest {
-//  def main(args: Array[String]): Unit = {
-//    //new URL("https://archive.apache.org/dist/accumulo/1.10.0/accumulo-1.10.0-src.tar.gz"),
-//    val array = Array(new URL("https://mirrors.tuna.tsinghua.edu.cn/apache/hadoop/common/hadoop-2.10.1/hadoop-2.10.1-site.tar.gz"))
-//    //      new URL("https://archive.apache.org/dist/accumulo/1.10.0/accumulo-1.10.0-bin.tar.gz.sha512"))
-//    val a = new DownloadExecutor()
-//    println("this is " + a.downloadExecute(array))
-//    println("all size is " + a.totalSize)
-//  }
-//}
+object ExecutorTest {
+  def main(args: Array[String]): Unit = {
+    //new URL("https://archive.apache.org/dist/accumulo/1.10.0/accumulo-1.10.0-src.tar.gz"),
+    val array = Array(new URL("https://mirrors.tuna.tsinghua.edu.cn/apache/hadoop/common/hadoop-3.3.0/hadoop-3.3.0-src.tar.gz"))
+    //      new URL("https://archive.apache.org/dist/accumulo/1.10.0/accumulo-1.10.0-bin.tar.gz.sha512"))
+    val a = new DownloadExecutor()
+    println("this is " + a.downloadExecute(array))
+    println("all size is " + a.totalSize)
+  }
+}

@@ -21,7 +21,12 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
   private val logger = LoggerFactory.getLogger(classOf[ServeServiceImpl])
 
   override def downloadComponent(responseObserver: StreamObserver[DownloadComponentResponse]): StreamObserver[DownloadComponentRequest] = {
+    val downloader = new DownloadExecutor()
+
     new StreamObserver[DownloadComponentRequest] {
+
+      var mysize: Long = 0
+
       override def onNext(v: DownloadComponentRequest): Unit = {
         v.getCommandType match {
           case "start" =>
@@ -29,20 +34,19 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
             v.getComponentMapMap.forEach((key, value) => {
               arrayUrl.addOne(UrlUtils.getUrl(key, value))
             })
-            val downloader = new DownloadExecutor()
             downloader.downloadExecute(arrayUrl.toArray)
-            val downloadThread = new Thread() {
-              override def run(): Unit = {
-                while (DownloadExecutor.downloadSize.get() < downloader.totalSize) {
-                  sleep(1000)
-                  responseObserver.onNext(DownloadComponentResponse.newBuilder()
-                    .setAlreadyDownloadSize(DownloadExecutor.downloadSize.get())
-                    .setTotalSize(downloader.totalSize).build())
-                }
-              }
+            while ( {
+              mysize = DownloadExecutor.downloadSize.get()
+              mysize
+            } < downloader.totalSize) {
+              sleep(1000)
+              logger.info(s"size is ${mysize}")
+              responseObserver.onNext(DownloadComponentResponse.newBuilder()
+                .setAlreadyDownloadSize(mysize)
+                .setTotalSize(downloader.totalSize).build())
             }
-            downloadThread.run()
         }
+        responseObserver.onCompleted()
       }
 
       override def onError(throwable: Throwable): Unit = {
@@ -259,7 +263,7 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
             val bufferWorkers: BufferedWriter = new BufferedWriter(new FileWriter(s"${SystemConfig.userHomePath}" +
               s"/BDMData/$key-$value/etc/hadoop/workers"))
             nodeMap.forEach((key, value) => {
-              if (key != AppConfig.serve.masterName){
+              if (key != AppConfig.serve.masterName) {
                 bufferWorkers.write(s"${key}")
                 bufferWorkers.flush()
                 bufferWorkers.newLine()
@@ -285,7 +289,7 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
         responseObserver.onNext(DeployResponse.newBuilder().setStep("close").setStatus("finish").setMessage("close").build())
         responseObserver.onCompleted()
       })
-    }catch {
+    } catch {
       case exception: Exception => {
         logger.error(exception.toString)
         responseObserver.onError(exception.getCause)

@@ -13,7 +13,7 @@ import java.util.concurrent.Callable
 class DownloadFileTask(var url: URL, val startIndex: Long, val endIndex: Long, val fileName: String) extends Callable[Int] {
 
   def updateDownloadSize(size: Long): Unit = {
-    DownloadExecutor.downloadSize.addAndGet(size)
+    DownloadExecutor.downloadSize.getAndAdd(size)
   }
 
   def downloadFile(): Int = {

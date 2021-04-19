@@ -25,15 +25,16 @@ class MasterClient(
   private val logger = LoggerFactory.getLogger(classOf[MasterService])
   //  val layer = new LayerDownloadService()
 
-  def invokeDownload(map: java.util.Map[String, String]): Unit = {
+  def invokeDownload(cyclicBarrier: CyclicBarrier, map: java.util.Map[String, String]): Unit = {
     val grpcResponse: StreamObserver[DownloadComponentResponse] = new StreamObserver[DownloadComponentResponse] {
       override def onNext(v: DownloadComponentResponse): Unit = {
-        DownloadController.totalSize = v.getTotalSize
-        DownloadController.downloadControllerCallback(Thread.currentThread().getId, v.getAlreadyDownloadSize)
-        if (v.getTotalSize <= v.getAlreadyDownloadSize) {
-          //          send(v.getTotalSize, v.getAlreadyDownloadSize, _, _, "finish")
-          onCompleted()
-        }
+
+        // 记忆未阻塞处理器获得的最新数据
+        DownloadController.alreadyDownloadSize.getAndAdd(v.getAlreadyDownloadSize)
+        //
+        logger.error(s"size is ${v.getTotalSize}")
+        DownloadController.totalSize.set(v.getTotalSize)
+        cyclicBarrier.await()
       }
 
       override def onError(throwable: Throwable): Unit = {
@@ -41,6 +42,7 @@ class MasterClient(
       }
 
       override def onCompleted(): Unit = {
+        DistributeController.nowComponents.getAndIncrement()
         logger.info("Completed")
       }
     }
@@ -77,7 +79,7 @@ class MasterClient(
       }
 
       override def onCompleted(): Unit = {
-        DistributeController.nowComponents += 1
+        DistributeController.nowComponents.getAndIncrement()
         logger.info("Completed")
       }
     }

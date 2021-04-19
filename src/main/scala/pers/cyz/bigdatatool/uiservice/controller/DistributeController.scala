@@ -1,6 +1,7 @@
 package pers.cyz.bigdatatool.uiservice.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import edu.emory.mathcs.backport.java.util.concurrent.atomic.AtomicInteger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import pers.cyz.bigdatatool.common.config.SystemConfig
@@ -41,10 +42,8 @@ class DistributeController {
     var totalSize: Long = 0
     var totalComponents: Int = 0
     val file = new File(s"${SystemConfig.userHomePath}/BDMData/cache/${message.replace("\"", "")}")
-    //    @volatile var completeSignal = true
 
     val threadNum = MasterNode.masterClientArray.length
-    //    logger.info(s"ThreadNum is ${DistributeController.threadNum}")
     val cyclicBarrier: CyclicBarrier = new CyclicBarrier(threadNum, new Thread(() => {
       nowSize = DistributeController.alreadyDownloadSize.get()
       DistributeController.alreadyDownloadSize.set(0)
@@ -65,14 +64,16 @@ class DistributeController {
         // 判断完成度
         if (totalSize <= nowSize && totalSize != 0) {
           logger.info(s"Finish allSize is ${totalSize} already is ${nowSize}")
-          sendMessage(totalSize, nowSize, totalComponents, DistributeController.nowComponents, "finish")
+          sendMessage(totalSize, nowSize, totalComponents, DistributeController.nowComponents.get(), "finish")
           DistributeController.clear()
           // gc
           System.gc()
           break
         }
         logger.info(s"Main allsize is ${totalSize} already is ${nowSize}")
-        sendMessage(totalSize, nowSize, totalComponents, DistributeController.nowComponents, "run")
+        sendMessage(totalSize, nowSize, totalComponents, DistributeController.nowComponents.get(), "run")
+        // gc
+        System.gc()
       }
     }
   }
@@ -116,12 +117,12 @@ class DistributeController {
 
 object DistributeController {
   var alreadyDownloadSize = new AtomicLong(0)
-  var nowComponents = 0
+  var nowComponents = new AtomicInteger(0)
 
 
   def clear(): Unit = {
     this.alreadyDownloadSize.set(0)
-    this.nowComponents = 0
+    this.nowComponents.set(0)
 
   }
 
