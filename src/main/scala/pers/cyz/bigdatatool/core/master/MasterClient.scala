@@ -32,7 +32,7 @@ class MasterClient(
         // 记忆未阻塞处理器获得的最新数据
         DownloadController.alreadyDownloadSize.getAndAdd(v.getAlreadyDownloadSize)
         //
-        logger.error(s"size is ${v.getTotalSize}")
+//        logger.error(s"size is ${v.getTotalSize}")
         DownloadController.totalSize.set(v.getTotalSize)
         cyclicBarrier.await()
       }

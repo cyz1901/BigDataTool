@@ -56,7 +56,7 @@ class DownloadExecutor {
 //    ex.execute(new DownloadControllerTask(totalSize))
     for (url <- array) {
       val blockSize = getBlockSize(url, threadNum )
-      for (i <- 1 until threadNum) {
+      for (i <- 1 to threadNum) {
           ex.submit(new DownloadFileTask(url, blockSize * (i - 1), blockSize * i, getFileName(url)))
       }
     }
@@ -74,7 +74,7 @@ object DownloadExecutor {
 object ExecutorTest {
   def main(args: Array[String]): Unit = {
     //new URL("https://archive.apache.org/dist/accumulo/1.10.0/accumulo-1.10.0-src.tar.gz"),
-    val array = Array(new URL("https://mirrors.tuna.tsinghua.edu.cn/apache/hadoop/common/hadoop-3.3.0/hadoop-3.3.0-src.tar.gz"))
+    val array = Array(new URL("https://mirrors.tuna.tsinghua.edu.cn/apache/hadoop/common/hadoop-3.3.0/hadoop-3.3.0.tar.gz"))
     //      new URL("https://archive.apache.org/dist/accumulo/1.10.0/accumulo-1.10.0-bin.tar.gz.sha512"))
     val a = new DownloadExecutor()
     println("this is " + a.downloadExecute(array))

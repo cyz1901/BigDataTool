@@ -1,5 +1,5 @@
 serve:
-  masterName: Computer
+  masterName: cyz-b450
   nodeCount: 1
   metaAddress: Meta
 repository:

@@ -16,6 +16,7 @@ import java.nio.ByteBuffer
 import java.nio.channels.{Channels, FileChannel}
 import sys.process._
 import scala.collection.mutable.ArrayBuffer
+import scala.util.control.Breaks.{break, breakable}
 
 class ServeServiceImpl extends ServeGrpc.ServeImplBase {
   private val logger = LoggerFactory.getLogger(classOf[ServeServiceImpl])
@@ -35,18 +36,23 @@ class ServeServiceImpl extends ServeGrpc.ServeImplBase {
               arrayUrl.addOne(UrlUtils.getUrl(key, value))
             })
             downloader.downloadExecute(arrayUrl.toArray)
-            while ( {
-              mysize = DownloadExecutor.downloadSize.get()
-              mysize
-            } < downloader.totalSize) {
-              sleep(1000)
-              logger.info(s"size is ${mysize}")
-              responseObserver.onNext(DownloadComponentResponse.newBuilder()
-                .setAlreadyDownloadSize(mysize)
-                .setTotalSize(downloader.totalSize).build())
+            breakable {
+              while (
+              {mysize = DownloadExecutor.downloadSize.get()
+                true}
+              ) {
+                sleep(1000)
+                logger.info(s"size is ${DownloadExecutor.downloadSize.get()}")
+                responseObserver.onNext(DownloadComponentResponse.newBuilder()
+                  .setAlreadyDownloadSize(DownloadExecutor.downloadSize.get())
+                  .setTotalSize(downloader.totalSize).build())
+                if (mysize >= downloader.totalSize) {
+                  responseObserver.onCompleted()
+                  break
+                }
+              }
             }
         }
-        responseObserver.onCompleted()
       }
 
       override def onError(throwable: Throwable): Unit = {

@@ -70,14 +70,14 @@ class DownloadController {
         sleep(1000)
         // 判断完成度
         if (DownloadController.totalSize.get() * threadNum <= nowSize && DownloadController.totalSize.get() * threadNum != 0) {
-//          logger.info(s"Finish allSize is ${totalSize} already is ${nowSize}")
+          logger.info(s"already is ${DownloadController.totalSize.get()}")
           sendMessage(DownloadController.totalSize.get() * threadNum, nowSize, totalComponents, DownloadController.nowComponents.get(), "finish")
           DownloadController.clear()
           // gc
           System.gc()
           break
         }
-//        logger.info(s"Main allsize is ${totalSize} already is ${nowSize}")
+        logger.info(s"already is ${nowSize}")
         sendMessage(DownloadController.totalSize.get() * threadNum, nowSize, totalComponents, DownloadController.nowComponents.get(), "run")
       }
     }
