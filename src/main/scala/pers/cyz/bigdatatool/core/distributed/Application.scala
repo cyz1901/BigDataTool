@@ -26,6 +26,7 @@ object Application {
       .setConfigFilePath("src/main/resources/etc/node.yml").build().fileToObjMapping()
 
     //检测默认文件是否存在
+    // mac os /Users/chenyizhou
     val path = new File(s"${SystemConfig.userHomePath}/${AppConfig.repository.downloadFile}/")
     path.mkdirs()
 

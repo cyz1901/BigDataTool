@@ -1,5 +1,5 @@
 serve:
-  masterName: cyz-b450
+  masterName: chenyizhoudeMacBook-Pro.local
   nodeCount: 1
   metaAddress: Meta
 repository:

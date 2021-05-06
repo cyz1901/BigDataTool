@@ -1,6 +1,6 @@
-import pers.cyz.bigdatatool.common.config.SystemConfig
+import pers.cyz.bigdatatool.common.config.{AppConfig, SystemConfig}
 
-import java.io.{BufferedWriter, FileWriter}
+import java.io.{BufferedWriter, File, FileWriter}
 import java.util
 import java.util.Map
 
@@ -34,6 +34,12 @@ object writeTest {
   }
 
   def main(args: Array[String]): Unit = {
-    wrr2()
+    val a = System.getProperties.getProperty("os.arch")
+    println(a)
+    println(System.getProperty("user.home"))
+
+//    val path = new File(s"${System.getProperty("user.home")}/BDMData/")
+//    path.mkdir()
+//    println(path)
   }
 }
